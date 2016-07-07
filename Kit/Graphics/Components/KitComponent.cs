@@ -2,6 +2,7 @@
 using Kit.Graphics.Types;
 using Kit.Core.Delegates;
 using System.Runtime.InteropServices;
+using Kit.Core;
 
 namespace Kit.Graphics.Components
 {
@@ -17,7 +18,7 @@ namespace Kit.Graphics.Components
         /// <summary>
         /// Offset from parent's anchor from this origin
         /// </summary>
-        private Vector2 location;
+        public Vector2 Location { get; set; }
 
         private Vector2 size;
         public Vector2 Size
@@ -40,18 +41,24 @@ namespace Kit.Graphics.Components
 
         public event VoidDelegate Resize;
 
+        public event MouseStateDelegate MouseInput;
+
+        public bool Focused { get; set; }
+
         protected double time;
 
         protected bool debugKey_Pressed = false;
 
         public KitComponent(Vector2 location = default(Vector2), Vector2 Size = default(Vector2))
         {
+            Focused = false;
             redraw = true;
             Children = new List<KitComponent>();
             parent = null;
-            this.location = location;
+            this.Location = location;
             this.Size = Size;
             ComponentDepth = 0;
+            Masked = false;
         }
 
         public void SetParent(KitComponent parent)
@@ -95,7 +102,7 @@ namespace Kit.Graphics.Components
 
         public Vector2 GetLocation()
         {
-            return location + GetOffset();
+            return Location + GetOffset();
         }
 
         public Vector2 GetAbsoluteLocation()
@@ -148,6 +155,31 @@ namespace Kit.Graphics.Components
 
             Update?.Invoke();
             OnUpdate();
+        }
+
+        protected virtual void OnMouseInput(Vector2 clickLocation, MouseState mouseFlags)
+        {
+
+        }
+
+        public void _NotifyMouseInput(Vector2 clickLocation, MouseState mouseFlags)
+        {
+            Box thisBox = new Box(GetAbsoluteLocation(), Size);
+            if(thisBox.Contains(clickLocation) && mouseFlags == MouseState.LeftDown)
+            {
+                Focused = true;
+            }
+            else
+            {
+                Focused = false;
+            }
+
+            foreach(KitComponent child in Children)
+            {
+                child._NotifyMouseInput(clickLocation, mouseFlags);
+            }
+            OnMouseInput(clickLocation, mouseFlags);
+            MouseInput?.Invoke(clickLocation, mouseFlags);
         }
 
         protected Vector2 GetOffset()

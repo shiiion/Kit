@@ -71,10 +71,10 @@ namespace Kit.Graphics.Drawing
             renderer.DrawLine(lineBrush, (Point)p1, (Point)p2);
         }
 
-        public Vector2 GetTextBounds(string text, KitFont font)
+        public static Vector2 GetTextBounds(string text, KitFont font)
         {
             FormattedText ft = new FormattedText(text, System.Globalization.CultureInfo.GetCultureInfo("en-us"),
-                    FlowDirection.LeftToRight, font.NormalFont, font.FontSize, colorBrush);
+                    FlowDirection.LeftToRight, font.NormalFont, font.FontSize, Brushes.Red);
             return new Vector2(ft.Width, ft.Height);
         }
 
@@ -120,8 +120,6 @@ namespace Kit.Graphics.Drawing
             {
                 renderer.DrawImage(image, new Rect(outRect.Pos.X, outRect.Pos.Y, outRect.Size.X, outRect.Size.Y));
             }
-            renderer.Pop();
-            renderer.Pop();
         }
 
 
@@ -156,8 +154,16 @@ namespace Kit.Graphics.Drawing
             {
                 //THROW EXC
             }
+            renderer.PushClip(new RectangleGeometry(new Rect(pos.X, pos.Y, size.X, size.Y)));
+        }
 
-
+        public void Pop()
+        {
+            if (renderer == null)
+            {
+                //THROW EXC
+            }
+            renderer.Pop();
         }
     }
 }

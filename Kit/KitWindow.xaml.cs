@@ -6,6 +6,8 @@ using Kit.Graphics.Components;
 using Kit.Graphics.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
+using Kit.Graphics.Types;
+using Kit.Core;
 
 namespace Kit
 {
@@ -28,14 +30,7 @@ namespace Kit
                 Anchor = KitAnchoring.Center
             };
             componentBrush = new KitBrush();
-
-            KitImage img = new KitImage(@"D:\jpeg\tst.png")
-            {
-                Origin = KitAnchoring.Center,
-                Anchor = KitAnchoring.RightCenter,
-                ComponentDepth = 0.8
-            };
-
+            
             KitImage img2 = new KitImage(@"D:\jpeg\dog.jpg")
             {
                 Origin = KitAnchoring.Center,
@@ -43,26 +38,13 @@ namespace Kit
                 ComponentDepth = 0.5
             };
 
-            KitText text = new KitText("text string")
+            KitTextBox ktb = new KitTextBox(12, 100)
             {
-                Origin = KitAnchoring.Center,
-                Anchor = KitAnchoring.RightCenter,
-                ComponentDepth = 0.9,
-                TextColor = Colors.Red
+                ComponentDepth = 1.0
             };
-
-            KitText text2 = new KitText("text string two")
-            {
-                Origin = KitAnchoring.LeftCenter,
-                TextColor = Colors.Blue,
-                ComponentDepth = 0.9
-            };
-
-            img.ScaleImage(new Graphics.Types.Vector2(0.1, 0.1));
-            TopLevelComponent.AddChild(img);
+            
             TopLevelComponent.AddChild(img2);
-            img2.AddChild(text);
-            text.AddChild(text2);
+            img2.AddChild(ktb);
 
             SizeChanged += delegate (object sender, SizeChangedEventArgs args)
             {
@@ -100,7 +82,8 @@ namespace Kit
         {
             lock(windowLock)
             {
-                TopLevelComponent.UpdateSubcomponents(Core.GlobalTimer.GetCurTime());
+                TopLevelComponent.UpdateSubcomponents(GlobalTimer.GetCurTime());
+                //Console.WriteLine(GlobalTimer.GetCurTime());
             }
         }
 
@@ -108,6 +91,32 @@ namespace Kit
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
         [DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
+
+        protected override void OnMouseDown(MouseButtonEventArgs e)
+        {
+            lock(windowLock)
+            {
+                MouseState state = 0;
+                
+                if(e.ButtonState == MouseButtonState.Pressed)
+                {
+                    state |= MouseState.Down;
+                }
+                if(e.ChangedButton == MouseButton.Left)
+                {
+                    state |= MouseState.Left;
+                }
+                else if(e.ChangedButton != MouseButton.Right)
+                {
+                    return;
+                }
+
+                Vector2 mouseLoc = (Vector2)e.GetPosition(this);
+
+                TopLevelComponent.NotifyMouseInput(mouseLoc, state);
+            }
+            base.OnMouseDown(e);
+        }
 
         protected override void OnMouseMove(MouseEventArgs e)
         {

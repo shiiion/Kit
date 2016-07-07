@@ -51,8 +51,10 @@ namespace Kit.Graphics.Components
 
         protected override void DrawComponent(KitBrush brush)
         {
+            pushNecessaryClips(brush);
             Vector2 loc = GetAbsoluteLocation();
             brush.DrawImage(Image, new Box(loc, Size));
+            popNecessaryClips(brush);
             redraw = false;
             base.DrawComponent(brush);
         }

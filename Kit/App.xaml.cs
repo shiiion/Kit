@@ -23,6 +23,7 @@ namespace Kit
                 {
                     window.UpdateComponents();
                 }
+                Thread.Sleep(16);
             }
         }
 

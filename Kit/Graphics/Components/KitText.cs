@@ -55,18 +55,18 @@ namespace Kit.Graphics.Components
             return new Vector2(formattedText.Width, formattedText.Height);
         }
 
-        public override void PreDrawComponent(List<KitComponent> drawList, KitBrush brush)
+        public override void PreDrawComponent(KitBrush brush)
         {
             Size = getTextSize(Text);
-            base.PreDrawComponent(drawList, brush);
+            base.PreDrawComponent(brush);
         }
 
         protected override void DrawComponent(KitBrush brush)
         {
             Vector2 pos = GetAbsoluteLocation();
-
+            pushNecessaryClips(brush);
             brush.DrawString(Text, Font, pos, TextColor);
-
+            popNecessaryClips(brush);
             base.DrawComponent(brush);
         }
     }

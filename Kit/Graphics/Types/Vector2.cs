@@ -101,7 +101,12 @@ namespace Kit.Graphics.Types
 
         public static explicit operator Point(Vector2 cast)
         {
-            return new Point((int)cast.X, (int)cast.Y);
+            return new Point(cast.X, cast.Y);
+        }
+
+        public static explicit operator Vector2(Point cast)
+        {
+            return new Vector2(cast.X, cast.Y);
         }
 
         public override string ToString()

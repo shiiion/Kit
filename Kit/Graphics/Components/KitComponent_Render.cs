@@ -13,7 +13,16 @@ namespace Kit.Graphics.Components
 
         public double ComponentDepth { get; set; }
 
-        public bool Masked { get; set; }
+        private bool masked;
+        public bool Masked
+        {
+            get { return masked; }
+            set
+            {
+                masked = value;
+                Redraw = true;
+            }
+        }
 
         //private bool masked;
         //public bool Masked
@@ -69,33 +78,41 @@ namespace Kit.Graphics.Components
         {
         }
 
-        public virtual void PreDrawComponent(List<KitComponent> drawList, KitBrush brush)
+        public void OrderByDepth(List<KitComponent> outList)
         {
-            if (drawList.Count == 0)
+            if (outList.Count == 0)
             {
-                drawList.Add(this);
+                outList.Add(this);
             }
             else
             {
                 bool beforeEnd = false;
-                for (int i = 0; i < drawList.Count; i++)
+                for (int i = 0; i < outList.Count; i++)
                 {
-                    if (drawList[i].ComponentDepth >= ComponentDepth)
+                    if (outList[i].ComponentDepth >= ComponentDepth)
                     {
-                        drawList.Insert(i, this);
+                        outList.Insert(i, this);
                         beforeEnd = true;
                         break;
                     }
                 }
                 if (!beforeEnd)
                 {
-                    drawList.Add(this);
+                    outList.Add(this);
                 }
             }
 
             foreach (KitComponent child in Children)
             {
-                child.PreDrawComponent(drawList, brush);
+                child.OrderByDepth(outList);
+            }
+        }
+
+        public virtual void PreDrawComponent(KitBrush brush)
+        {
+            foreach(KitComponent child in Children)
+            {
+                child.PreDrawComponent(brush);
             }
         }
 
@@ -118,10 +135,11 @@ namespace Kit.Graphics.Components
         {
             Vector2 pos = GetAbsoluteLocation();
             brush.SetLineThickness(1);
-            brush.DrawRectangle(new Box(pos, Size.X - 1, Size.Y - 1), false, Colors.Red);
+            brush.DrawRectangle(new Box(pos, Size.X, Size.Y), false, Colors.Red);
             brush.DrawLine(pos + new Vector2(Size.X / 2.0, 0), pos + new Vector2(Size.X / 2.0, Size.Y), Colors.Red, 1);
             brush.DrawLine(pos + new Vector2(0, Size.Y / 2.0), pos + new Vector2(Size.X, Size.Y / 2.0), Colors.Red, 1);
-            brush.DrawString(GetType().Name, debugFont, pos, Colors.Red);
+            if(Focused)
+                brush.DrawString(GetType().Name, debugFont, pos, Colors.Red);
             foreach(KitComponent child in Children)
             {
                 child.DrawComponentDebugInfo(brush);
@@ -138,7 +156,7 @@ namespace Kit.Graphics.Components
             if(Masked)
             {
                 Vector2 loc = GetAbsoluteLocation();
-                brush.PushClip();
+                brush.PushClip(loc, Size);
             }
 
             if(parent != null)

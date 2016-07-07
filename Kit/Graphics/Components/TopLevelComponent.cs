@@ -1,7 +1,8 @@
-﻿using System;
+﻿using System.Windows.Input;
 using System.Collections.Generic;
 using Kit.Graphics.Types;
 using Kit.Graphics.Drawing;
+using Kit.Core;
 
 namespace Kit.Graphics.Components
 {
@@ -15,14 +16,23 @@ namespace Kit.Graphics.Components
             drawOrder = new List<KitComponent>();
         }
 
+        private void orderByDepth(List<KitComponent> list)
+        {
+            list.Clear();
+            foreach (KitComponent child in Children)
+            {
+                child.OrderByDepth(list);
+            }
+        }
+
         //POSSIBLE RE-IMPLEMENTATION: use IComparable to sort list
         public void PreDrawComponentTree(KitBrush brush)
         {
-            drawOrder.Clear();
-            foreach(KitComponent child in Children)
+            foreach (KitComponent child in Children)
             {
-                child.PreDrawComponent(drawOrder, brush);
+                child.PreDrawComponent(brush);
             }
+            orderByDepth(drawOrder);
         }
 
         protected override void OnUpdate()
@@ -30,10 +40,35 @@ namespace Kit.Graphics.Components
             base.OnUpdate();
         }
 
+        public void NotifyMouseInput(Vector2 clickLocation, MouseState mouseFlags)
+        {
+            foreach (KitComponent child in Children)
+            {
+                child._NotifyMouseInput(clickLocation, mouseFlags);
+            }
+
+            List<KitComponent> depthOrder = new List<KitComponent>();
+            orderByDepth(depthOrder);
+
+            for (int i = 0; i < depthOrder.Count; i++)
+            {
+                if (!depthOrder[i].Focused)
+                {
+                    depthOrder.Remove(depthOrder[i]);
+                    i--;
+                }
+            }
+
+            for (int i = 0; i < depthOrder.Count - 1; i++)
+            {
+                depthOrder[i].Focused = false;
+            }
+        }
+
         public void DrawComponentTree(KitBrush brush)
         {
 
-            foreach(KitComponent component in drawOrder)
+            foreach (KitComponent component in drawOrder)
             {
                 component._DrawComponent(brush);
             }
