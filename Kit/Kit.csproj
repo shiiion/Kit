@@ -40,6 +40,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -67,7 +68,8 @@
     <Compile Include="Core\Delegates\BaseDelegates.cs" />
     <Compile Include="Core\Exceptions\TimerStoppedException.cs" />
     <Compile Include="Core\GlobalTimer.cs" />
-    <Compile Include="Core\MouseData.cs" />
+    <Compile Include="Core\InputData.cs" />
+    <Compile Include="Core\TextIOFormatter.cs" />
     <Compile Include="Graphics\Components\IContainer.cs" />
     <Compile Include="Graphics\Components\KitComponent.cs" />
     <Compile Include="Graphics\Components\KitComponent_Render.cs" />

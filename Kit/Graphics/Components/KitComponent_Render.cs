@@ -13,6 +13,8 @@ namespace Kit.Graphics.Components
 
         public double ComponentDepth { get; set; }
 
+        public bool ShouldDraw { get; set; }
+
         private bool masked;
         public bool Masked
         {
@@ -23,26 +25,6 @@ namespace Kit.Graphics.Components
                 Redraw = true;
             }
         }
-
-        //private bool masked;
-        //public bool Masked
-        //{
-        //    get
-        //    {
-        //        if (parent != null)
-        //        {
-        //            return masked | parent.Masked;
-        //        }
-        //        else
-        //        {
-        //            return masked;
-        //        }
-        //    }
-        //    set
-        //    {
-        //        masked = value;
-        //    }
-        //}
 
         private object redrawLock = new object();
         protected bool redraw;
@@ -138,8 +120,10 @@ namespace Kit.Graphics.Components
             brush.DrawRectangle(new Box(pos, Size.X, Size.Y), false, Colors.Red);
             brush.DrawLine(pos + new Vector2(Size.X / 2.0, 0), pos + new Vector2(Size.X / 2.0, Size.Y), Colors.Red, 1);
             brush.DrawLine(pos + new Vector2(0, Size.Y / 2.0), pos + new Vector2(Size.X, Size.Y / 2.0), Colors.Red, 1);
-            if(Focused)
+            if (Focused)
+            {
                 brush.DrawString(GetType().Name, debugFont, pos, Colors.Red);
+            }
             foreach(KitComponent child in Children)
             {
                 child.DrawComponentDebugInfo(brush);

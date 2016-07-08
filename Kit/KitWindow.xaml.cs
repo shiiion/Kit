@@ -38,8 +38,9 @@ namespace Kit
                 ComponentDepth = 0.5
             };
 
-            KitTextBox ktb = new KitTextBox(12, 100)
+            KitTextBox ktb = new KitTextBox(12, 500)
             {
+                Origin = KitAnchoring.Center,
                 ComponentDepth = 1.0
             };
             
@@ -115,7 +116,44 @@ namespace Kit
 
                 TopLevelComponent.NotifyMouseInput(mouseLoc, state);
             }
+            
             base.OnMouseDown(e);
+        }
+
+        protected override void OnTextInput(TextCompositionEventArgs e)
+        {
+            lock(windowLock)
+            {
+                TopLevelComponent.NotifyTextInput(e.Text);
+            }
+            base.OnTextInput(e);
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            lock(windowLock)
+            {
+                KeyState state;
+                if(e.IsRepeat)
+                {
+                    state = KeyState.Hold;
+                }
+                else
+                {
+                    state = KeyState.Press;
+                }
+                TopLevelComponent.NotifyKeyInput(e.Key, state);
+            }
+            base.OnKeyDown(e);
+        }
+
+        protected override void OnKeyUp(KeyEventArgs e)
+        {
+            lock (windowLock)
+            {
+                TopLevelComponent.NotifyKeyInput(e.Key, KeyState.Release);
+            }
+            base.OnKeyUp(e);
         }
 
         protected override void OnMouseMove(MouseEventArgs e)

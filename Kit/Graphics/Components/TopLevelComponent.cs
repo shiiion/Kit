@@ -28,9 +28,11 @@ namespace Kit.Graphics.Components
         //POSSIBLE RE-IMPLEMENTATION: use IComparable to sort list
         public void PreDrawComponentTree(KitBrush brush)
         {
+            debugKey_Pressed = false;
             foreach (KitComponent child in Children)
             {
                 child.PreDrawComponent(brush);
+                debugKey_Pressed |= child.debugKey_Pressed;
             }
             orderByDepth(drawOrder);
         }
@@ -65,12 +67,31 @@ namespace Kit.Graphics.Components
             }
         }
 
+        public void NotifyKeyInput(Key key, KeyState state)
+        {
+            foreach (KitComponent child in Children)
+            {
+                child._NotifyKeyInput(key, state);
+            }
+        }
+
+        public void NotifyTextInput(string text)
+        {
+            foreach(KitComponent child in Children)
+            {
+                child._NotifyTextInput(text);
+            }
+        }
+
         public void DrawComponentTree(KitBrush brush)
         {
 
             foreach (KitComponent component in drawOrder)
             {
-                component._DrawComponent(brush);
+                if (component.ShouldDraw)
+                {
+                    component._DrawComponent(brush);
+                }
             }
             redraw = false;
 #if DEBUG

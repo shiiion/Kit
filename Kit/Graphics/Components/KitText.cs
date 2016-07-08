@@ -9,7 +9,7 @@ using Kit.Graphics.Types;
 
 namespace Kit.Graphics.Components
 {
-    class KitText : KitComponent
+    public class KitText : KitComponent
     {
         private string text;
         public string Text
@@ -36,7 +36,7 @@ namespace Kit.Graphics.Components
             {
                 FontSize = ptSize
             };
-            LoadFont(text);
+            LoadFont(font);
             Text = text;
             TextColor = Colors.Black;
         }

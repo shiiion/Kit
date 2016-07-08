@@ -75,7 +75,8 @@ namespace Kit.Graphics.Drawing
         {
             FormattedText ft = new FormattedText(text, System.Globalization.CultureInfo.GetCultureInfo("en-us"),
                     FlowDirection.LeftToRight, font.NormalFont, font.FontSize, Brushes.Red);
-            return new Vector2(ft.Width, ft.Height);
+            
+            return new Vector2(ft.WidthIncludingTrailingWhitespace, ft.Height);
         }
 
         public void DrawString(string text, KitFont font, Vector2 location, Color color)

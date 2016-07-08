@@ -17,4 +17,11 @@ namespace Kit.Core
         Down = 0x01,
         Left = 0x02
     }
+
+    public enum KeyState
+    {
+        Press,
+        Hold,
+        Release
+    }
 }

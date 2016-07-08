@@ -3,6 +3,7 @@ using Kit.Graphics.Types;
 using Kit.Core.Delegates;
 using System.Runtime.InteropServices;
 using Kit.Core;
+using System.Windows.Input;
 
 namespace Kit.Graphics.Components
 {
@@ -38,32 +39,36 @@ namespace Kit.Graphics.Components
         public Vector2 CustomAnchor { get; set; }
 
         public event VoidDelegate Update;
-
         public event VoidDelegate Resize;
-
         public event MouseStateDelegate MouseInput;
+        public event KeyStateEventDelegate KeyInput;
+        public event StringDelegate TextInput;
 
         public bool Focused { get; set; }
 
         protected double time;
 
-        protected bool debugKey_Pressed = false;
+        public bool debugKey_Pressed { get; set; }
 
         public KitComponent(Vector2 location = default(Vector2), Vector2 Size = default(Vector2))
         {
             Focused = false;
             redraw = true;
+            Masked = false;
+            ShouldDraw = true;
+
             Children = new List<KitComponent>();
+
             parent = null;
-            this.Location = location;
+
+            Location = location;
             this.Size = Size;
             ComponentDepth = 0;
-            Masked = false;
         }
 
         public void SetParent(KitComponent parent)
         {
-            if(parent.parent == this)
+            if (parent.parent == this)
             {
                 //THROW EXC
                 return;
@@ -73,7 +78,7 @@ namespace Kit.Graphics.Components
 
         public void AddChild(KitComponent child)
         {
-            if(!isValidChild(child))
+            if (!isValidChild(child))
             {
                 //THROW EXC
                 return;
@@ -84,7 +89,7 @@ namespace Kit.Graphics.Components
 
         private bool isValidChild(KitComponent child)
         {
-            if(parent == child)
+            if (parent == child)
             {
                 return false;
             }
@@ -92,7 +97,7 @@ namespace Kit.Graphics.Components
             while (cParent != null)
             {
                 cParent = cParent.parent;
-                if(parent == cParent)
+                if (parent == cParent)
                 {
                     return false;
                 }
@@ -117,31 +122,8 @@ namespace Kit.Graphics.Components
             }
         }
 
-#if DEBUG
-        [DllImport("user32.dll")]
-        static extern short GetAsyncKeyState(int key);
-#endif
-
         protected virtual void OnUpdate()
         {
-#if DEBUG
-            if (GetAsyncKeyState(0x10) != 0)
-            {
-                if (!debugKey_Pressed)
-                {
-                    debugKey_Pressed = true;
-                    Redraw = true;
-                }
-            }
-            else
-            {
-                if (debugKey_Pressed)
-                {
-                    debugKey_Pressed = false;
-                    Redraw = true;
-                }
-            }
-#endif
         }
 
         public void UpdateSubcomponents(double CurTime)
@@ -158,14 +140,40 @@ namespace Kit.Graphics.Components
         }
 
         protected virtual void OnMouseInput(Vector2 clickLocation, MouseState mouseFlags)
-        {
+        { }
 
+        protected virtual void OnKeyInput(Key key, KeyState state)
+        {
+#if DEBUG
+            if (key == Key.LeftCtrl)
+            {
+                if (state == KeyState.Press)
+                {
+                    if (!debugKey_Pressed)
+                    {
+                        debugKey_Pressed = true;
+                        Redraw = true;
+                    }
+                }
+                if (state == KeyState.Release)
+                {
+                    if (debugKey_Pressed)
+                    {
+                        debugKey_Pressed = false;
+                        Redraw = true;
+                    }
+                }
+            }
+#endif
         }
+
+        protected virtual void OnTextInput(string text)
+        { }
 
         public void _NotifyMouseInput(Vector2 clickLocation, MouseState mouseFlags)
         {
             Box thisBox = new Box(GetAbsoluteLocation(), Size);
-            if(thisBox.Contains(clickLocation) && mouseFlags == MouseState.LeftDown)
+            if (thisBox.Contains(clickLocation) && mouseFlags == MouseState.LeftDown)
             {
                 Focused = true;
             }
@@ -174,7 +182,7 @@ namespace Kit.Graphics.Components
                 Focused = false;
             }
 
-            foreach(KitComponent child in Children)
+            foreach (KitComponent child in Children)
             {
                 child._NotifyMouseInput(clickLocation, mouseFlags);
             }
@@ -182,13 +190,33 @@ namespace Kit.Graphics.Components
             MouseInput?.Invoke(clickLocation, mouseFlags);
         }
 
+        public void _NotifyTextInput(string text)
+        {
+            foreach (KitComponent child in Children)
+            {
+                child._NotifyTextInput(text);
+            }
+            OnTextInput(text);
+            TextInput?.Invoke(text);
+        }
+
+        public void _NotifyKeyInput(Key key, KeyState state)
+        {
+            foreach (KitComponent child in Children)
+            {
+                child._NotifyKeyInput(key, state);
+            }
+            OnKeyInput(key, state);
+            KeyInput?.Invoke(key, state);
+        }
+
         protected Vector2 GetOffset()
         {
-            if(parent == null)
+            if (parent == null)
             {
                 return Vector2.Zero;
             }
-            switch(parent.Anchor)
+            switch (parent.Anchor)
             {
                 default:
                 case KitAnchoring.TopLeft:
@@ -216,7 +244,7 @@ namespace Kit.Graphics.Components
 
         protected Vector2 GetOffset(Vector2 anchorOffset)
         {
-            switch(Origin)
+            switch (Origin)
             {
                 default:
                 case KitAnchoring.TopLeft:
