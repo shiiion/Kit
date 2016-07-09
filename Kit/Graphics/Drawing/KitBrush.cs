@@ -135,17 +135,35 @@ namespace Kit.Graphics.Drawing
             Rect drawArea = new Rect(rectangle.Pos.X, rectangle.Pos.Y, rectangle.Size.X, rectangle.Size.Y);
 
             SetColor(color);
-
+            
             if (filled)
             {
                 renderer.DrawRectangle(colorBrush, null, drawArea);
             }
             else
             {
-                renderer.DrawLine(lineBrush, (Point)rectangle.Pos, (Point)(rectangle.Pos + new Vector2(0, rectangle.Size.Y)));
-                renderer.DrawLine(lineBrush, (Point)(rectangle.Pos + new Vector2(0, rectangle.Size.Y)), (Point)(rectangle.Pos + rectangle.Size));
-                renderer.DrawLine(lineBrush, (Point)(rectangle.Pos + rectangle.Size), (Point)(rectangle.Pos + new Vector2(rectangle.Size.X, 0)));
-                renderer.DrawLine(lineBrush, (Point)(rectangle.Pos + new Vector2(rectangle.Size.X, 0)), (Point)(rectangle.Pos));
+                renderer.DrawRectangle(null, lineBrush, drawArea);
+            }
+        }
+
+        public void DrawRoundedRectangle(Box rectangle, bool filled, Color color, double radX, double radY)
+        {
+            if (renderer == null)
+            {
+                //THROW EXC
+            }
+
+            Rect drawArea = new Rect(rectangle.Pos.X, rectangle.Pos.Y, rectangle.Size.X, rectangle.Size.Y);
+
+            SetColor(color);
+
+            if (filled)
+            {
+                renderer.DrawRoundedRectangle(colorBrush, null, drawArea, radX, radY);
+            }
+            else
+            {
+                renderer.DrawRoundedRectangle(null, lineBrush, drawArea, radX, radY);
             }
         }
 

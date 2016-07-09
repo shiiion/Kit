@@ -18,9 +18,9 @@ namespace Kit.Graphics.Components
         public KitTextBox(double fontSize, double maxWidth, Vector2 location = default(Vector2))
             : base(location)
         {
-            Anchor = KitAnchoring.LeftCenter;
             TextField = new KitText("TextField", "Consolas", fontSize, Vector2.Zero, Size)
             {
+                Anchor = KitAnchoring.LeftCenter,
                 Origin = KitAnchoring.LeftCenter,
                 TextColor = System.Windows.Media.Colors.Black,
                 ShouldDraw = false
@@ -30,7 +30,7 @@ namespace Kit.Graphics.Components
             AddChild(TextField);
             Masked = true;
             Vector2 TextMetrics = KitBrush.GetTextBounds("|", TextField.Font);
-            Size = new Vector2(maxWidth + 4, TextMetrics.Y + 4);
+            Size = new Vector2(maxWidth, TextMetrics.Y + 4);
             lastFlashTime = time;
         }
 
@@ -102,45 +102,43 @@ namespace Kit.Graphics.Components
 
         protected override void OnMouseInput(Vector2 clickLocation, MouseState mouseFlags)
         {
-            if (Focused || TextField.Focused)
+            if ((Focused || TextField.Focused) && mouseFlags == MouseState.LeftDown)
             {
                 Vector2 relativeClick = clickLocation - TextField.GetAbsoluteLocation();
-                if (relativeClick.X <= 0)
-                {
-                    formatter.CursorLoc = 0;
-                }
-                else if (relativeClick.X >= TextField.Size.X)
-                {
-                    formatter.CursorLoc = formatter.CURSOR_END;
-                }
-                else
-                {
-                    int i = 0;
-                    for (; i < TextField.Text.Length; i++)
-                    {
-                        Vector2 textDims = KitBrush.GetTextBounds(TextField.Text.Substring(0, i), TextField.Font);
-                        Vector2 nextTextDims = KitBrush.GetTextBounds(TextField.Text.Substring(0, i + 1), TextField.Font);
-                        if (relativeClick.X >= textDims.X && relativeClick.X <= nextTextDims.X)
-                        {
-                            if (relativeClick.X - textDims.X > nextTextDims.X - relativeClick.X)
-                            {
-                                i++;
-                            }
-                            break;
-                        }
-                    }
-                    if(i == TextField.Text.Length)
-                    {
-                        i = formatter.CURSOR_END;
-                    }
-                    formatter.CursorLoc = i;
-                }
+                formatter.InsertCursorAt(relativeClick);
                 dashOn = true;
                 Redraw = true;
                 lastFlashTime = time;
                 formatter.EndHighlight();
             }
+            else if ((mouseFlags & MouseState.Down) == MouseState.Down)
+            {
+                dashOn = false;
+                lastFlashTime = time;
+                Redraw = true;
+            }
             base.OnMouseInput(clickLocation, mouseFlags);
+        }
+
+        protected override bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
+        {
+            if ((Focused || TextField.Focused) && state == MouseState.Left)
+            {
+                if(!formatter.HighlightEnabled())
+                {
+                    formatter.BeginHighlight();
+                    Redraw = true;
+                    dashOn = false;
+                    lastFlashTime = time;
+                }
+                if(formatter.InsertHighlightEndAt(end - TextField.GetAbsoluteLocation()))
+                {
+                    Redraw = true;
+                    dashOn = false;
+                    lastFlashTime = time;
+                }
+            }
+            return false;
         }
 
         protected override void DrawComponent(KitBrush brush)
@@ -148,7 +146,7 @@ namespace Kit.Graphics.Components
             Vector2 lineStart = GetAbsoluteLocation();
             Vector2 lineEnd = new Vector2(lineStart.X, lineStart.Y + Size.Y);
             System.Windows.Media.Color nc = System.Windows.Media.Color.FromArgb(0x7F, 0xFF, 0, 0);
-            brush.DrawRectangle(new Box(new Vector2(lineStart.X, lineStart.Y), new Vector2(Size.X, Size.Y)), true, nc);
+            brush.DrawRoundedRectangle(new Box(new Vector2(lineStart.X - 2, lineStart.Y), new Vector2(Size.X + 4, Size.Y)), true, nc, 5, 5);
 
             double pixelCursorOffset = formatter.GetCursorOffset();
 
@@ -159,7 +157,7 @@ namespace Kit.Graphics.Components
 
             pushNecessaryClips(brush);
 
-            if(formatter.Highlighting())
+            if (formatter.Highlighting())
             {
                 System.Windows.Media.Color hColor = System.Windows.Media.Color.FromArgb(0x7F, 0, 0, 0xFF);
 

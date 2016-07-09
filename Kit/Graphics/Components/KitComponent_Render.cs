@@ -105,6 +105,44 @@ namespace Kit.Graphics.Components
             OnDraw();
         }
         
+        private KitComponent getFrontComponentFromBranch()
+        {
+            if (Children.Count == 0)
+            {
+                return this;
+            }
+            else
+            {
+                KitComponent front = null;
+                foreach(KitComponent child in Children)
+                {
+                    front = child.getFrontComponentFromBranch();
+                }
+                if(front.ComponentDepth >= ComponentDepth)
+                {
+                    return front;
+                }
+                return this;
+            }
+        }
+
+        public KitComponent FrontmostComponentAt(Vector2 location)
+        {
+            if(parent == null)
+            {
+                KitComponent frontmostChild = null;
+                foreach(KitComponent child in Children)
+                {
+                    frontmostChild = child.getFrontComponentFromBranch();
+                }
+                return frontmostChild;
+            }
+            else
+            {
+                return parent.FrontmostComponentAt(location);
+            }
+        }
+
 #if DEBUG
 
         KitFont debugFont = new KitFont()

@@ -55,7 +55,6 @@ namespace Kit.Graphics.Components
             Vector2 loc = GetAbsoluteLocation();
             brush.DrawImage(Image, new Box(loc, Size));
             popNecessaryClips(brush);
-            redraw = false;
             base.DrawComponent(brush);
         }
     }

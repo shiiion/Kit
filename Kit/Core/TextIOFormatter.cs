@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using Kit.Graphics.Types;
 using Kit.Graphics.Components;
+using Kit.Graphics.Drawing;
 
 namespace Kit.Core
 {
@@ -202,6 +203,42 @@ namespace Kit.Core
             return bounds.X;
         }
 
+        private int getIndexAtLocation(Vector2 location)
+        {
+            int ret;
+            if (location.X <= 0)
+            {
+                ret = 0;
+            }
+            else if (location.X >= FormatComponent.Size.X)
+            {
+                ret = CURSOR_END;
+            }
+            else
+            {
+                int i = 0;
+                for (; i < FormatComponent.Text.Length; i++)
+                {
+                    Vector2 textDims = KitBrush.GetTextBounds(FormatComponent.Text.Substring(0, i), FormatComponent.Font);
+                    Vector2 nextTextDims = KitBrush.GetTextBounds(FormatComponent.Text.Substring(0, i + 1), FormatComponent.Font);
+                    if (location.X >= textDims.X && location.X <= nextTextDims.X)
+                    {
+                        if (location.X - textDims.X > nextTextDims.X - location.X)
+                        {
+                            i++;
+                        }
+                        break;
+                    }
+                }
+                if (i == FormatComponent.Text.Length)
+                {
+                    i = CURSOR_END;
+                }
+                ret = i;
+            }
+            return ret;
+        }
+
         public void InsertText(string text)
         {
             if (Highlighting())
@@ -280,6 +317,11 @@ namespace Kit.Core
             return shouldRedraw;
         }
 
+        public bool HighlightEnabled()
+        {
+            return textHighlight.Enabled;
+        }
+
         public bool Highlighting()
         {
             return textHighlight.Enabled && (textHighlight.End != textHighlight.Start);
@@ -332,6 +374,23 @@ namespace Kit.Core
         public double GetCursorOffset()
         {
             return getTextOffset(CursorLoc);
+        }
+
+        public bool InsertHighlightEndAt(Vector2 relativeLocation)
+        {
+            if(textHighlight.Enabled)
+            {
+                int end = textHighlight.End;
+                textHighlight.End = getIndexAtLocation(relativeLocation);
+                CursorLoc = textHighlight.End;
+                return end != textHighlight.End;
+            }
+            return false;
+        }
+
+        public void InsertCursorAt(Vector2 relativeLocation)
+        {
+            CursorLoc = getIndexAtLocation(relativeLocation);
         }
     }
 }

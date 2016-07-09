@@ -32,6 +32,10 @@ namespace Kit.Graphics.Components
             }
         }
 
+        public bool Draggable { get; set; }
+        
+
+
         public KitAnchoring Anchor;
         public KitAnchoring Origin;
 
@@ -41,8 +45,9 @@ namespace Kit.Graphics.Components
         public event VoidDelegate Update;
         public event VoidDelegate Resize;
         public event MouseStateDelegate MouseInput;
-        public event KeyStateEventDelegate KeyInput;
+        public event KeyStateDelegate KeyInput;
         public event StringDelegate TextInput;
+        public event MouseMoveDelegate MouseMove;
 
         public bool Focused { get; set; }
 
@@ -103,6 +108,12 @@ namespace Kit.Graphics.Components
                 }
             }
             return true;
+        }
+
+        public bool Contains(Vector2 point)
+        {
+            Box thisBox = new Box(GetAbsoluteLocation(), Size);
+            return thisBox.Contains(point);
         }
 
         public Vector2 GetLocation()
@@ -169,15 +180,20 @@ namespace Kit.Graphics.Components
 
         protected virtual void OnTextInput(string text)
         { }
+        
+        /// <returns>If the window is enabled to move</returns>
+        protected virtual bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
+        {
+            return false;
+        }
 
         public void _NotifyMouseInput(Vector2 clickLocation, MouseState mouseFlags)
         {
-            Box thisBox = new Box(GetAbsoluteLocation(), Size);
-            if (thisBox.Contains(clickLocation) && mouseFlags == MouseState.LeftDown)
+            if (Contains(clickLocation) && mouseFlags == MouseState.LeftDown)
             {
                 Focused = true;
             }
-            else
+            else if(mouseFlags == MouseState.LeftDown)
             {
                 Focused = false;
             }
@@ -210,13 +226,25 @@ namespace Kit.Graphics.Components
             KeyInput?.Invoke(key, state);
         }
 
+        public bool _NotifyMouseMove(MouseState state, Vector2 start, Vector2 end)
+        {
+            bool ret = false;
+            foreach(KitComponent child in Children)
+            {
+                ret |= child._NotifyMouseMove(state, start, end);
+            }
+            ret |= OnMouseMove(state, start, end);
+            MouseMove?.Invoke(state, start, end);
+            return ret;
+        }
+
         protected Vector2 GetOffset()
         {
             if (parent == null)
             {
                 return Vector2.Zero;
             }
-            switch (parent.Anchor)
+            switch (Anchor)
             {
                 default:
                 case KitAnchoring.TopLeft:

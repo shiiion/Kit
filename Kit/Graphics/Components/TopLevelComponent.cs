@@ -10,10 +10,16 @@ namespace Kit.Graphics.Components
     {
         private List<KitComponent> drawOrder;
 
+        private KitTitleBar titleBar;
+
+        public Vector2 WindowLocation { get; set; }
+
         public TopLevelComponent(KitWindow owner)
             : base(Vector2.Zero, new Vector2(owner.Width, owner.Height))
         {
             drawOrder = new List<KitComponent>();
+            titleBar = new KitTitleBar(System.Windows.Media.Color.FromArgb(220, 127, 127, 127), this, "Titlebar");
+            AddChild(titleBar);
         }
 
         private void orderByDepth(List<KitComponent> list)
@@ -48,22 +54,24 @@ namespace Kit.Graphics.Components
             {
                 child._NotifyMouseInput(clickLocation, mouseFlags);
             }
-
-            List<KitComponent> depthOrder = new List<KitComponent>();
-            orderByDepth(depthOrder);
-
-            for (int i = 0; i < depthOrder.Count; i++)
+            if ((mouseFlags & MouseState.Down) == MouseState.Down)
             {
-                if (!depthOrder[i].Focused)
+                List<KitComponent> depthOrder = new List<KitComponent>();
+                orderByDepth(depthOrder);
+
+                for (int i = 0; i < depthOrder.Count; i++)
                 {
-                    depthOrder.Remove(depthOrder[i]);
-                    i--;
+                    if (!depthOrder[i].Focused)
+                    {
+                        depthOrder.Remove(depthOrder[i]);
+                        i--;
+                    }
                 }
-            }
 
-            for (int i = 0; i < depthOrder.Count - 1; i++)
-            {
-                depthOrder[i].Focused = false;
+                for (int i = 0; i < depthOrder.Count - 1; i++)
+                {
+                    depthOrder[i].Focused = false;
+                }
             }
         }
 
@@ -83,9 +91,18 @@ namespace Kit.Graphics.Components
             }
         }
 
+        public bool NotifyMouseMove(MouseState state, Vector2 start, Vector2 end)
+        {
+            bool ret = false;
+            foreach(KitComponent child in Children)
+            {
+                ret |= child._NotifyMouseMove(state, start, end);
+            }
+            return ret;
+        }
+
         public void DrawComponentTree(KitBrush brush)
         {
-
             foreach (KitComponent component in drawOrder)
             {
                 if (component.ShouldDraw)

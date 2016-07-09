@@ -21,17 +21,20 @@ namespace Kit
         private KitBrush componentBrush;
         private object windowLock = new object();
 
+        private Vector2 lastMouseLoc;
+
+        private Vector2 windowLoc;
+
         public KitWindow()
         {
             InitializeComponent();
 
-            TopLevelComponent = new TopLevelComponent(this)
-            {
-                Anchor = KitAnchoring.Center
-            };
+            lastMouseLoc = new Vector2(-1, -1);
+
+            TopLevelComponent = new TopLevelComponent(this);
             componentBrush = new KitBrush();
             
-            KitImage img2 = new KitImage(@"D:\jpeg\dog.jpg")
+            KitImage img2 = new KitImage(@"D:\jpeg\VqGMB7T.png")
             {
                 Origin = KitAnchoring.Center,
                 Anchor = KitAnchoring.Center,
@@ -41,19 +44,20 @@ namespace Kit
             KitTextBox ktb = new KitTextBox(12, 500)
             {
                 Origin = KitAnchoring.Center,
+                Anchor = KitAnchoring.Center,
                 ComponentDepth = 1.0
             };
-            
+            img2.ScaleImage(new Vector2(0.3, 0.3));
             TopLevelComponent.AddChild(img2);
             img2.AddChild(ktb);
 
-            SizeChanged += delegate (object sender, SizeChangedEventArgs args)
+            SizeChanged += (o, e) =>
             {
-                TopLevelComponent.Size = new Graphics.Types.Vector2(args.NewSize.Width, args.NewSize.Height);
+                TopLevelComponent.Size = new Vector2(e.NewSize.Width, e.NewSize.Height);
                 TopLevelComponent.Redraw = true;
             };
 
-            CompositionTarget.Rendering += (object sender, EventArgs args) =>
+            CompositionTarget.Rendering += (o, e) =>
             {
                 if (TopLevelComponent.Redraw)
                 {
@@ -63,10 +67,23 @@ namespace Kit
                     }
                 }
             };
+
+            Loaded += (o, e) =>
+            {
+                Left = 200;
+                Top = 200;
+                windowLoc = new Vector2(200, 200);
+            };
+
+            LocationChanged += (o, e) =>
+            {
+                windowLoc = new Vector2(Left, Top);
+            };
         }
 
         protected override void OnRender(DrawingContext drawingContext)
         {
+            Console.Write("PAINT");
             BeginPaint(drawingContext);
             base.OnRender(drawingContext);
         }
@@ -83,8 +100,8 @@ namespace Kit
         {
             lock(windowLock)
             {
+                TopLevelComponent.WindowLocation = windowLoc;
                 TopLevelComponent.UpdateSubcomponents(GlobalTimer.GetCurTime());
-                //Console.WriteLine(GlobalTimer.GetCurTime());
             }
         }
 
@@ -97,12 +114,11 @@ namespace Kit
         {
             lock(windowLock)
             {
+                lastMouseLoc = (Vector2)e.GetPosition(this);
                 MouseState state = 0;
-                
-                if(e.ButtonState == MouseButtonState.Pressed)
-                {
-                    state |= MouseState.Down;
-                }
+
+                state |= MouseState.Down;
+
                 if(e.ChangedButton == MouseButton.Left)
                 {
                     state |= MouseState.Left;
@@ -118,6 +134,29 @@ namespace Kit
             }
             
             base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseUp(MouseButtonEventArgs e)
+        {
+            lock(windowLock)
+            {
+                lastMouseLoc = new Vector2(-1, -1);
+                MouseState state = 0;
+
+                if (e.ChangedButton == MouseButton.Left)
+                {
+                    state |= MouseState.Left;
+                }
+                else if (e.ChangedButton != MouseButton.Right)
+                {
+                    return;
+                }
+
+                Vector2 mouseLoc = (Vector2)e.GetPosition(this);
+
+                TopLevelComponent.NotifyMouseInput(mouseLoc, state);
+            }
+            base.OnMouseUp(e);
         }
 
         protected override void OnTextInput(TextCompositionEventArgs e)
@@ -156,12 +195,34 @@ namespace Kit
             base.OnKeyUp(e);
         }
 
+        
+
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if(lastMouseLoc.X != -1)
             {
-                ReleaseCapture();
-                SendMessage(new WindowInteropHelper(this).Handle, 0xA1, 0x2, 0);
+                MouseState state;
+                if (e.LeftButton == MouseButtonState.Pressed)
+                {
+                    state = MouseState.Left;
+                }
+                else if(e.RightButton == MouseButtonState.Pressed)
+                {
+                    state = 0;
+                }
+                else
+                {
+                    base.OnMouseMove(e);
+                    return;
+                }
+
+                Vector2 newLoc = (Vector2)e.GetPosition(this);
+                if(TopLevelComponent.NotifyMouseMove(state, lastMouseLoc, newLoc) && e.LeftButton == MouseButtonState.Pressed)
+                {
+                    ReleaseCapture();
+                    SendMessage(new WindowInteropHelper(this).Handle, 0xA1, 0x2, 0);
+                }
+                lastMouseLoc = newLoc;
             }
             base.OnMouseMove(e);
         }

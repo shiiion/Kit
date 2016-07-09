@@ -76,6 +76,7 @@
     <Compile Include="Graphics\Components\KitImage.cs" />
     <Compile Include="Graphics\Components\KitText.cs" />
     <Compile Include="Graphics\Components\KitTextBox.cs" />
+    <Compile Include="Graphics\Components\KitTitleBar.cs" />
     <Compile Include="Graphics\Components\TopLevelComponent.cs" />
     <Compile Include="Graphics\Drawing\KitBrush.cs" />
     <Compile Include="Graphics\Drawing\KitFont.cs" />
