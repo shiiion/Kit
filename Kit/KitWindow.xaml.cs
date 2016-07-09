@@ -83,7 +83,6 @@ namespace Kit
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            Console.Write("PAINT");
             BeginPaint(drawingContext);
             base.OnRender(drawingContext);
         }
@@ -194,8 +193,6 @@ namespace Kit
             }
             base.OnKeyUp(e);
         }
-
-        
 
         protected override void OnMouseMove(MouseEventArgs e)
         {

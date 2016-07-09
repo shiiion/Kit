@@ -53,6 +53,7 @@ namespace Kit.Graphics.Components
             titleComponent = new KitText(title, "Consolas", 13, new Vector2(5, 5))
             {
                 Origin = KitAnchoring.LeftCenter,
+                Anchor = KitAnchoring.LeftCenter,
                 ShouldDraw = false,
                 TextColor = Color.FromArgb(barColor.A, 255, 255, 255)
             };
@@ -152,7 +153,6 @@ namespace Kit.Graphics.Components
                 brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, faded, 5, 5);
 
                 titleComponent.TextColor = Color.FromArgb(newAlpha, titleComponent.TextColor.R, titleComponent.TextColor.G, titleComponent.TextColor.B);
-
                 titleComponent._DrawComponent(brush);
                 return;
             }
@@ -177,6 +177,7 @@ namespace Kit.Graphics.Components
                 brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, faded, 5, 5);
 
                 titleComponent.TextColor = Color.FromArgb(newAlpha, titleComponent.TextColor.R, titleComponent.TextColor.G, titleComponent.TextColor.B);
+
 
                 titleComponent._DrawComponent(brush);
                 return;
