@@ -69,6 +69,7 @@ namespace Kit.Graphics.Components
             Location = location;
             this.Size = Size;
             ComponentDepth = 0;
+            Opacity = 1;
         }
 
         public void SetParent(KitComponent parent)

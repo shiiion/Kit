@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using Kit.Graphics.Types;
 using Kit.Graphics.Drawing;
 using Kit.Core;
+using Kit.Core.Delegates;
 
 namespace Kit.Graphics.Components
 {
@@ -24,42 +25,59 @@ namespace Kit.Graphics.Components
                 Redraw = true;
             }
         }
-
-        private double windowHoverTime;
-        private double windowReleaseTime;
         private TopLevelComponent topParent;
 
-        private const double FADE_TIME = 350;
-
         private KitText titleComponent;
+        private KitButton closeButton;
+        private AnimationControl fadingAnimation;
 
-        public KitTitleBar(Color barColor, TopLevelComponent topParent, string title = "", Vector2 location = default(Vector2))
+        public KitTitleBar(Color barColor, TopLevelComponent topParent, VoidDelegate onClose, string title = "", Vector2 location = default(Vector2))
             : base(location)
         {
+            ComponentDepth = double.MaxValue;
+            ShouldDraw = false;
             BarColor = barColor;
             Title = title;
-            windowHoverTime = -1;
-            ComponentDepth = double.MaxValue;
+
             this.topParent = topParent;
-            Anchor = KitAnchoring.TopCenter;
-            Origin = KitAnchoring.TopCenter;
+            Anchor = KitAnchoring.TopLeft;
+            Origin = KitAnchoring.TopLeft;
             Size = new Vector2(topParent.Size.X, 22);
+
+            Opacity = 0;
+
+            fadingAnimation = new AnimationControl(350, 1);
 
             topParent.Resize += () =>
             {
                 Size = new Vector2(topParent.Size.X, 22);
             };
 
-            titleComponent = new KitText(title, "Consolas", 13, new Vector2(5, 5))
+            titleComponent = new KitText(title, "Consolas", 13, new Vector2(5))
             {
                 Origin = KitAnchoring.LeftCenter,
                 Anchor = KitAnchoring.LeftCenter,
-                ShouldDraw = false,
-                TextColor = Color.FromArgb(barColor.A, 255, 255, 255)
+                TextColor = Color.FromArgb(barColor.A, 255, 255, 255),
+                ComponentDepth = double.MaxValue,
+                Opacity = 0
             };
 
+            closeButton = new KitButton(@"D:\JPEG\XButton.png", @"D:\JPEG\XButtonDown.png", new Vector2(16, 16))
+            {
+                Origin = KitAnchoring.RightCenter,
+                Anchor = KitAnchoring.RightCenter,
+                Location = new Vector2(-2, 0),
+                ComponentDepth = double.MaxValue,
+                Opacity = 0
+            };
+
+            closeButton.Released += onClose;
+
+            AddChild(titleComponent);
+            AddChild(closeButton);
         }
 
+        #region Interop GetCursorPos
         [StructLayout(LayoutKind.Sequential)]
         private struct POINT
         {
@@ -83,35 +101,41 @@ namespace Kit.Graphics.Components
             return lpPoint;
         }
 
+        #endregion
+
+        protected override void OnMouseInput(Vector2 clickLocation, MouseState mouseFlags)
+        {
+            if(closeButton.Contains(clickLocation))
+            {
+                Focused = false;
+            }
+            base.OnMouseInput(clickLocation, mouseFlags);
+        }
+
         protected override void OnUpdate()
         {
-            Vector2 cursorLoc = GetCursorPosition() - topParent.WindowLocation;
-            if(topParent.Contains(cursorLoc))
+            lock(redrawLock)
             {
-                if (windowHoverTime == -1)
+                Vector2 cursorLoc = GetCursorPosition() - topParent.WindowLocation;
+                if (topParent.Contains(cursorLoc))
                 {
-                    windowHoverTime = time;
-                }
-                if(time - windowHoverTime < FADE_TIME)
-                {
-                    Redraw = true;
-                }
-            }
-            else
-            {
-                if(windowHoverTime != -1)
-                {
-                    Redraw = true;
-                    windowReleaseTime = time;
-                }
-                windowHoverTime = -1;
-                if(time - windowReleaseTime < FADE_TIME)
-                {
-                    Redraw = true;
+                    if (!fadingAnimation.Animating || fadingAnimation.AnimationTag.Equals("fadeout"))
+                    {
+                        fadingAnimation.BeginAnimation(time, "fadein");
+                    }
                 }
                 else
                 {
-                    windowReleaseTime = -1;
+                    if(fadingAnimation.AnimationTag.Equals("fadein"))
+                    {
+                        fadingAnimation.BeginAnimation(time, "fadeout");
+                    }
+                }
+                fadingAnimation.StepAnimation(time);
+
+                if(!fadingAnimation.AnimationOver() && fadingAnimation.Animating)
+                {
+                    redraw = true;
                 }
             }
             base.OnUpdate();
@@ -129,60 +153,35 @@ namespace Kit.Graphics.Components
             return base.OnMouseMove(state, start, end);
         }
 
+        public override void PreDrawComponent(KitBrush brush)
+        {
+            if(fadingAnimation.AnimationOver())
+            {
+                Redraw = false;
+            }
+            if(fadingAnimation.AnimationTag.Equals("fadein"))
+            {
+                Opacity = fadingAnimation.GetGradient();
+            }
+            else if(fadingAnimation.AnimationTag.Equals("fadeout"))
+            {
+                Opacity = 1 - fadingAnimation.GetGradient();
+            }
+            titleComponent.Opacity = Opacity;
+            closeButton.Opacity = Opacity;
+            base.PreDrawComponent(brush);
+        }
+
         protected override void DrawComponent(KitBrush brush)
         {
             //REFACTOR TO ANIMATION CLASS
-            if(windowHoverTime != -1)
+            if(fadingAnimation.Animating)
             {
-                double alphaFade = (time - windowHoverTime) / FADE_TIME;
-
-                byte newAlpha;
-
-                if (alphaFade > 1.0)
-                {
-                    newAlpha = BarColor.A;
-                    Redraw = false;
-                }
-                else
-                {
-                    newAlpha = (byte)(BarColor.A * alphaFade);
-                }
-
-                Color faded = Color.FromArgb(newAlpha, BarColor.R, BarColor.G, BarColor.B);
-
-                brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, faded, 5, 5);
-
-                titleComponent.TextColor = Color.FromArgb(newAlpha, titleComponent.TextColor.R, titleComponent.TextColor.G, titleComponent.TextColor.B);
-                titleComponent._DrawComponent(brush);
+                brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, BarColor, 5, 5);
                 return;
             }
-            if(windowReleaseTime != -1)
-            {
-                double alphaFade = 1 - ((time - windowReleaseTime) / FADE_TIME);
+            Redraw = false;
 
-                byte newAlpha;
-
-                if (alphaFade > 1.0)
-                {
-                    newAlpha = BarColor.A;
-                    Redraw = false;
-                }
-                else
-                {
-                    newAlpha = (byte)(BarColor.A * alphaFade);
-                }
-
-                Color faded = Color.FromArgb(newAlpha, BarColor.R, BarColor.G, BarColor.B);
-
-                brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, faded, 5, 5);
-
-                titleComponent.TextColor = Color.FromArgb(newAlpha, titleComponent.TextColor.R, titleComponent.TextColor.G, titleComponent.TextColor.B);
-
-
-                titleComponent._DrawComponent(brush);
-                return;
-            }
-            redraw = false;
         }
     }
 }

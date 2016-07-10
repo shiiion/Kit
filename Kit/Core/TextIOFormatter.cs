@@ -340,6 +340,35 @@ namespace Kit.Core
             return ret;
         }
 
+        /// <summary>
+        /// attempts to make a vector which places the cursor at the center of visibleWidth
+        /// </summary>
+        /// <param name="visibleWidth">width of text's parent component</param>
+        /// <returns></returns>
+        public Vector2 GetVisibleOffset(double visibleWidth)
+        {
+            Vector2 ret = new Vector2(0, 0);
+            double endOffset = getTextOffset(CURSOR_END);
+            if(endOffset < visibleWidth)
+            {
+                return ret;
+            }
+
+            double cursorOffset = getTextOffset(CursorLoc);
+            
+            
+            if ((endOffset - cursorOffset) < (visibleWidth / 2))
+            {
+                ret.X = endOffset - visibleWidth + 2;
+            }
+            else if(cursorOffset > (visibleWidth / 2))
+            {
+                ret.X = cursorOffset - (visibleWidth / 2);
+            }
+            ret.X = -ret.X;
+            return ret;
+        }
+
         public void OnKey(Key key, KeyState state)
         {
             if (state == KeyState.Press || state == KeyState.Hold)

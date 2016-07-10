@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Kit.Graphics.Types;
 using Kit.Graphics.Drawing;
 using Kit.Core;
+using Kit.Core.Delegates;
 
 namespace Kit.Graphics.Components
 {
@@ -14,11 +15,11 @@ namespace Kit.Graphics.Components
 
         public Vector2 WindowLocation { get; set; }
 
-        public TopLevelComponent(KitWindow owner)
+        public TopLevelComponent(KitWindow owner, VoidDelegate onClose)
             : base(Vector2.Zero, new Vector2(owner.Width, owner.Height))
         {
             drawOrder = new List<KitComponent>();
-            titleBar = new KitTitleBar(System.Windows.Media.Color.FromArgb(220, 127, 127, 127), this, "Titlebar");
+            titleBar = new KitTitleBar(System.Windows.Media.Color.FromArgb(220, 127, 127, 127), this, onClose, "Titlebar");
             AddChild(titleBar);
         }
 
@@ -107,10 +108,24 @@ namespace Kit.Graphics.Components
             {
                 if (component.ShouldDraw)
                 {
+                    brush.PushOpacity(component.Opacity);
                     component._DrawComponent(brush);
+                    brush.Pop();
                 }
             }
             redraw = false;
+
+            brush.PushOpacity(titleBar.Opacity);
+            titleBar._DrawComponent(brush);
+            brush.Pop();
+
+            foreach (KitComponent component in titleBar.Children)
+            {
+                brush.PushOpacity(component.Opacity);
+                component._DrawComponent(brush);
+                brush.Pop();
+            }
+
 #if DEBUG
             if (debugKey_Pressed)
             {

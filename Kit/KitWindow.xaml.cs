@@ -31,30 +31,39 @@ namespace Kit
 
             lastMouseLoc = new Vector2(-1, -1);
 
-            TopLevelComponent = new TopLevelComponent(this);
+            TopLevelComponent = new TopLevelComponent(this, () => 
+            {
+                lock (App.WindowListLock)
+                {
+                    App.WindowList.Remove(this);
+                    Close();
+                }
+            });
             componentBrush = new KitBrush();
-            
+
             KitImage img2 = new KitImage(@"D:\jpeg\VqGMB7T.png")
             {
                 Origin = KitAnchoring.Center,
                 Anchor = KitAnchoring.Center,
-                ComponentDepth = 0.5
+                ComponentDepth = 0.5,
+                Location = new Vector2(0, 22)
             };
 
-            KitTextBox ktb = new KitTextBox(12, 500)
+            KitTextBox ktb = new KitTextBox(12, 200)
             {
                 Origin = KitAnchoring.Center,
                 Anchor = KitAnchoring.Center,
                 ComponentDepth = 1.0
             };
-            img2.ScaleImage(new Vector2(0.3, 0.3));
             TopLevelComponent.AddChild(img2);
+            img2.Size = TopLevelComponent.Size;
             img2.AddChild(ktb);
 
             SizeChanged += (o, e) =>
             {
                 TopLevelComponent.Size = new Vector2(e.NewSize.Width, e.NewSize.Height);
                 TopLevelComponent.Redraw = true;
+                img2.Size = TopLevelComponent.Size;
             };
 
             CompositionTarget.Rendering += (o, e) =>
@@ -80,6 +89,9 @@ namespace Kit
                 windowLoc = new Vector2(Left, Top);
             };
         }
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool IsWindowVisible(IntPtr hWnd);
 
         protected override void OnRender(DrawingContext drawingContext)
         {
@@ -97,7 +109,7 @@ namespace Kit
 
         public void UpdateComponents()
         {
-            lock(windowLock)
+            lock (windowLock)
             {
                 TopLevelComponent.WindowLocation = windowLoc;
                 TopLevelComponent.UpdateSubcomponents(GlobalTimer.GetCurTime());

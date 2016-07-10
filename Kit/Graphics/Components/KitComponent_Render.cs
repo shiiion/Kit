@@ -15,6 +15,8 @@ namespace Kit.Graphics.Components
 
         public bool ShouldDraw { get; set; }
 
+        public double Opacity { get; set; }
+
         private bool masked;
         public bool Masked
         {
@@ -26,7 +28,7 @@ namespace Kit.Graphics.Components
             }
         }
 
-        private object redrawLock = new object();
+        protected object redrawLock = new object();
         protected bool redraw;
         public bool Redraw
         {
@@ -105,19 +107,42 @@ namespace Kit.Graphics.Components
             OnDraw();
         }
         
-        private KitComponent getFrontComponentFromBranch()
+        private KitComponent getFrontComponentFromBranch(Vector2 location)
         {
             if (Children.Count == 0)
             {
-                return this;
+                if (Contains(location))
+                {
+                    return this;
+                }
+                else
+                {
+                    return null;
+                }
             }
             else
             {
                 KitComponent front = null;
                 foreach(KitComponent child in Children)
                 {
-                    front = child.getFrontComponentFromBranch();
+                    front = child.getFrontComponentFromBranch(location);
                 }
+                if(front == null)
+                {
+                    if(Contains(location))
+                    {
+                        return this;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                if(!Contains(location))
+                {
+                    return front;
+                }
+                //if child depth is equal to this depth, return child component
                 if(front.ComponentDepth >= ComponentDepth)
                 {
                     return front;
@@ -133,7 +158,7 @@ namespace Kit.Graphics.Components
                 KitComponent frontmostChild = null;
                 foreach(KitComponent child in Children)
                 {
-                    frontmostChild = child.getFrontComponentFromBranch();
+                    frontmostChild = child.getFrontComponentFromBranch(location);
                 }
                 return frontmostChild;
             }
@@ -173,6 +198,7 @@ namespace Kit.Graphics.Components
             redraw = false;
         }
 
+        
         protected void pushNecessaryClips(KitBrush brush)
         {
             if(Masked)

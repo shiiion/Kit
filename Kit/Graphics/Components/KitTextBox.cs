@@ -150,8 +150,10 @@ namespace Kit.Graphics.Components
 
             double pixelCursorOffset = formatter.GetCursorOffset();
 
-            lineStart.X += pixelCursorOffset;
-            lineEnd.X += pixelCursorOffset;
+            TextField.Location = formatter.GetVisibleOffset(Size.X);
+
+            lineStart.X += pixelCursorOffset + TextField.Location.X;
+            lineEnd.X += pixelCursorOffset + TextField.Location.X;
             lineStart.Y += 1;
             lineEnd.Y -= 1;
 
@@ -160,11 +162,8 @@ namespace Kit.Graphics.Components
             if (formatter.Highlighting())
             {
                 System.Windows.Media.Color hColor = System.Windows.Media.Color.FromArgb(0x7F, 0, 0, 0xFF);
-
                 Box highlightRect = formatter.GetHighlightRect();
-
                 highlightRect.Pos += TextField.GetAbsoluteLocation();
-
                 brush.DrawRectangle(highlightRect, true, hColor);
             }
 
@@ -176,6 +175,7 @@ namespace Kit.Graphics.Components
                 brush.DrawLine(lineStart, lineEnd, TextField.TextColor, 1);
             }
             popNecessaryClips(brush);
+
 
             TextField._DrawComponent(brush);
             base.DrawComponent(brush);

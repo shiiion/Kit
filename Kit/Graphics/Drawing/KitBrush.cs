@@ -111,7 +111,7 @@ namespace Kit.Graphics.Drawing
             {
                 //THROW EXC
             }
-            
+
             if (outRect.Size.X == 0 || outRect.Size.Y == 0)
             {
                 renderer.DrawImage(image, new Rect(outRect.Pos.X, outRect.Pos.Y, image.Width, image.Height));
@@ -182,6 +182,15 @@ namespace Kit.Graphics.Drawing
                 //THROW EXC
             }
             renderer.Pop();
+        }
+
+        public void PushOpacity(double opacity)
+        {
+            if (renderer == null)
+            {
+                //THROW EXC
+            }
+            renderer.PushOpacity(opacity);
         }
     }
 }

@@ -21,11 +21,13 @@ namespace Kit.Graphics.Components
             {
                 imagePath = value;
                 loadImage(imagePath);
+                Redraw = true;
             }
         }
 
         public KitImage(string path = "")
         {
+            Opacity = 1;
             ImagePath = path;
 
             if (!string.IsNullOrWhiteSpace(path))

@@ -12,13 +12,18 @@ namespace Kit
     {
         public static List<KitWindow> WindowList { get; set; }
 
+        public static object WindowListLock = new object();
+
         private static void updateThread()
         {
             while(WindowList.Count > 0)
             {
-                foreach(KitWindow window in WindowList)
+                lock (WindowListLock)
                 {
-                    window.UpdateComponents();
+                    foreach (KitWindow window in WindowList)
+                    {
+                        window.UpdateComponents();
+                    }
                 }
                 Thread.Sleep(16);
             }
@@ -31,12 +36,8 @@ namespace Kit
             WindowList = new List<KitWindow>();
             App kitApp = new App();
             KitWindow startWindow = new KitWindow();
-
             WindowList.Add(startWindow);
-
             startWindow.Show();
-
-            startWindow.Width = 600;
 
             Thread kitUpdateThread = new Thread(updateThread);
             kitUpdateThread.Start();

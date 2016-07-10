@@ -71,6 +71,7 @@
     <Compile Include="Core\InputData.cs" />
     <Compile Include="Core\TextIOFormatter.cs" />
     <Compile Include="Graphics\Components\IContainer.cs" />
+    <Compile Include="Graphics\Components\KitButton.cs" />
     <Compile Include="Graphics\Components\KitComponent.cs" />
     <Compile Include="Graphics\Components\KitComponent_Render.cs" />
     <Compile Include="Graphics\Components\KitImage.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Graphics\Components\KitTextBox.cs" />
     <Compile Include="Graphics\Components\KitTitleBar.cs" />
     <Compile Include="Graphics\Components\TopLevelComponent.cs" />
+    <Compile Include="Graphics\Drawing\AnimationControl.cs" />
     <Compile Include="Graphics\Drawing\KitBrush.cs" />
     <Compile Include="Graphics\Drawing\KitFont.cs" />
     <Compile Include="Graphics\Types\Box.cs" />
