@@ -9,7 +9,7 @@ namespace Kit.Core
 
         public static void StartTimer()
         {
-            if(programTimer.IsRunning)
+            if (programTimer.IsRunning)
             {
                 programTimer.Stop();
             }
@@ -18,7 +18,7 @@ namespace Kit.Core
 
         public static double GetCurTime()
         {
-            if(programTimer.IsRunning)
+            if (programTimer.IsRunning)
             {
                 return programTimer.ElapsedMilliseconds;
             }

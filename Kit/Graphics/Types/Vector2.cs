@@ -28,7 +28,7 @@ namespace Kit.Graphics.Types
         {
             return new Vector2(X - other.X, Y - other.Y);
         }
-        
+
         public Vector2 Mul(double scale)
         {
             return new Vector2(X * scale, Y * scale);

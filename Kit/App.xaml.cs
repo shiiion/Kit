@@ -16,7 +16,7 @@ namespace Kit
 
         private static void updateThread()
         {
-            while(WindowList.Count > 0)
+            while (WindowList.Count > 0)
             {
                 lock (WindowListLock)
                 {
@@ -41,8 +41,8 @@ namespace Kit
 
             Thread kitUpdateThread = new Thread(updateThread);
             kitUpdateThread.Start();
-            
+
             kitApp.Run();
         }
-    } 
+    }
 }

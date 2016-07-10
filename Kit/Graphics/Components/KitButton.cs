@@ -65,12 +65,12 @@ namespace Kit.Graphics.Components
 
         protected override bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
-            if(isPressed && !Contains(end))
+            if (isPressed && !Contains(end))
             {
                 ImagePath = ReleasedImage;
                 Size = sizeSave;
             }
-            else if(isPressed && Contains(end) && ImagePath.Equals(ReleasedImage))
+            else if (isPressed && Contains(end) && ImagePath.Equals(ReleasedImage))
             {
                 ImagePath = PressedImage;
                 Size = sizeSave;

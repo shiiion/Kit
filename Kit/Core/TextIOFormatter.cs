@@ -349,19 +349,19 @@ namespace Kit.Core
         {
             Vector2 ret = new Vector2(0, 0);
             double endOffset = getTextOffset(CURSOR_END);
-            if(endOffset < visibleWidth)
+            if (endOffset < visibleWidth)
             {
                 return ret;
             }
 
             double cursorOffset = getTextOffset(CursorLoc);
-            
-            
+
+
             if ((endOffset - cursorOffset) < (visibleWidth / 2))
             {
                 ret.X = endOffset - visibleWidth + 2;
             }
-            else if(cursorOffset > (visibleWidth / 2))
+            else if (cursorOffset > (visibleWidth / 2))
             {
                 ret.X = cursorOffset - (visibleWidth / 2);
             }
@@ -407,7 +407,7 @@ namespace Kit.Core
 
         public bool InsertHighlightEndAt(Vector2 relativeLocation)
         {
-            if(textHighlight.Enabled)
+            if (textHighlight.Enabled)
             {
                 int end = textHighlight.End;
                 textHighlight.End = getIndexAtLocation(relativeLocation);

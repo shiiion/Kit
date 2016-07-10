@@ -33,7 +33,7 @@ namespace Kit.Graphics.Components
         }
 
         public bool Draggable { get; set; }
-        
+
 
 
         public KitAnchoring Anchor;
@@ -181,7 +181,7 @@ namespace Kit.Graphics.Components
 
         protected virtual void OnTextInput(string text)
         { }
-        
+
         /// <returns>If the window is enabled to move</returns>
         protected virtual bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
@@ -194,7 +194,7 @@ namespace Kit.Graphics.Components
             {
                 Focused = true;
             }
-            else if(mouseFlags == MouseState.LeftDown)
+            else if (mouseFlags == MouseState.LeftDown)
             {
                 Focused = false;
             }
@@ -230,7 +230,7 @@ namespace Kit.Graphics.Components
         public bool _NotifyMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
             bool ret = false;
-            foreach(KitComponent child in Children)
+            foreach (KitComponent child in Children)
             {
                 ret |= child._NotifyMouseMove(state, start, end);
             }

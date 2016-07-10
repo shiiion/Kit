@@ -11,6 +11,6 @@ namespace Kit.Graphics.Drawing
         public double FontSize { get; set; }
 
         //special font implementation!!
-        
+
     }
 }

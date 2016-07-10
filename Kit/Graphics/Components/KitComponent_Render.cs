@@ -35,7 +35,7 @@ namespace Kit.Graphics.Components
             get
             {
                 bool ret;
-                lock(redrawLock)
+                lock (redrawLock)
                 {
                     ret = redraw;
                     foreach (KitComponent child in Children)
@@ -51,7 +51,7 @@ namespace Kit.Graphics.Components
             }
             set
             {
-                lock(redrawLock)
+                lock (redrawLock)
                 {
                     redraw = value;
                 }
@@ -94,7 +94,7 @@ namespace Kit.Graphics.Components
 
         public virtual void PreDrawComponent(KitBrush brush)
         {
-            foreach(KitComponent child in Children)
+            foreach (KitComponent child in Children)
             {
                 child.PreDrawComponent(brush);
             }
@@ -106,7 +106,7 @@ namespace Kit.Graphics.Components
             Draw?.Invoke();
             OnDraw();
         }
-        
+
         private KitComponent getFrontComponentFromBranch(Vector2 location)
         {
             if (Children.Count == 0)
@@ -123,13 +123,13 @@ namespace Kit.Graphics.Components
             else
             {
                 KitComponent front = null;
-                foreach(KitComponent child in Children)
+                foreach (KitComponent child in Children)
                 {
                     front = child.getFrontComponentFromBranch(location);
                 }
-                if(front == null)
+                if (front == null)
                 {
-                    if(Contains(location))
+                    if (Contains(location))
                     {
                         return this;
                     }
@@ -138,12 +138,12 @@ namespace Kit.Graphics.Components
                         return null;
                     }
                 }
-                if(!Contains(location))
+                if (!Contains(location))
                 {
                     return front;
                 }
                 //if child depth is equal to this depth, return child component
-                if(front.ComponentDepth >= ComponentDepth)
+                if (front.ComponentDepth >= ComponentDepth)
                 {
                     return front;
                 }
@@ -153,10 +153,10 @@ namespace Kit.Graphics.Components
 
         public KitComponent FrontmostComponentAt(Vector2 location)
         {
-            if(parent == null)
+            if (parent == null)
             {
                 KitComponent frontmostChild = null;
-                foreach(KitComponent child in Children)
+                foreach (KitComponent child in Children)
                 {
                     frontmostChild = child.getFrontComponentFromBranch(location);
                 }
@@ -187,7 +187,7 @@ namespace Kit.Graphics.Components
             {
                 brush.DrawString(GetType().Name, debugFont, pos, Colors.Red);
             }
-            foreach(KitComponent child in Children)
+            foreach (KitComponent child in Children)
             {
                 child.DrawComponentDebugInfo(brush);
             }
@@ -198,16 +198,16 @@ namespace Kit.Graphics.Components
             redraw = false;
         }
 
-        
+
         protected void pushNecessaryClips(KitBrush brush)
         {
-            if(Masked)
+            if (Masked)
             {
                 Vector2 loc = GetAbsoluteLocation();
                 brush.PushClip(loc, Size);
             }
 
-            if(parent != null)
+            if (parent != null)
             {
                 parent.pushNecessaryClips(brush);
             }
@@ -215,11 +215,11 @@ namespace Kit.Graphics.Components
 
         protected void popNecessaryClips(KitBrush brush)
         {
-            if(Masked)
+            if (Masked)
             {
                 brush.Pop();
             }
-            if(parent != null)
+            if (parent != null)
             {
                 parent.popNecessaryClips(brush);
             }

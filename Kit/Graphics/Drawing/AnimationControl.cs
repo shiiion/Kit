@@ -19,7 +19,7 @@ namespace Kit.Graphics.Drawing
 
         private double curGradientValue;
         public double StartTime { get; set; }
-        
+
         public AnimationControl(double animationLength, double valueRange)
         {
             AnimationLength = animationLength;
@@ -56,10 +56,10 @@ namespace Kit.Graphics.Drawing
 
         public void StepAnimation(double curTime)
         {
-            if(animating && !AnimationOver())
+            if (animating && !AnimationOver())
             {
                 curGradientValue = (curTime - StartTime) / AnimationLength;
-                if(curGradientValue > 1)
+                if (curGradientValue > 1)
                 {
                     curGradientValue = 1;
                 }

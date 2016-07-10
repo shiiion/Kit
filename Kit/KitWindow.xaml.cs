@@ -31,7 +31,7 @@ namespace Kit
 
             lastMouseLoc = new Vector2(-1, -1);
 
-            TopLevelComponent = new TopLevelComponent(this, () => 
+            TopLevelComponent = new TopLevelComponent(this, () =>
             {
                 lock (App.WindowListLock)
                 {
@@ -123,18 +123,18 @@ namespace Kit
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
-            lock(windowLock)
+            lock (windowLock)
             {
                 lastMouseLoc = (Vector2)e.GetPosition(this);
                 MouseState state = 0;
 
                 state |= MouseState.Down;
 
-                if(e.ChangedButton == MouseButton.Left)
+                if (e.ChangedButton == MouseButton.Left)
                 {
                     state |= MouseState.Left;
                 }
-                else if(e.ChangedButton != MouseButton.Right)
+                else if (e.ChangedButton != MouseButton.Right)
                 {
                     return;
                 }
@@ -143,13 +143,13 @@ namespace Kit
 
                 TopLevelComponent.NotifyMouseInput(mouseLoc, state);
             }
-            
+
             base.OnMouseDown(e);
         }
 
         protected override void OnMouseUp(MouseButtonEventArgs e)
         {
-            lock(windowLock)
+            lock (windowLock)
             {
                 lastMouseLoc = new Vector2(-1, -1);
                 MouseState state = 0;
@@ -172,7 +172,7 @@ namespace Kit
 
         protected override void OnTextInput(TextCompositionEventArgs e)
         {
-            lock(windowLock)
+            lock (windowLock)
             {
                 TopLevelComponent.NotifyTextInput(e.Text);
             }
@@ -181,10 +181,10 @@ namespace Kit
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            lock(windowLock)
+            lock (windowLock)
             {
                 KeyState state;
-                if(e.IsRepeat)
+                if (e.IsRepeat)
                 {
                     state = KeyState.Hold;
                 }
@@ -208,14 +208,14 @@ namespace Kit
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            if(lastMouseLoc.X != -1)
+            if (lastMouseLoc.X != -1)
             {
                 MouseState state;
                 if (e.LeftButton == MouseButtonState.Pressed)
                 {
                     state = MouseState.Left;
                 }
-                else if(e.RightButton == MouseButtonState.Pressed)
+                else if (e.RightButton == MouseButtonState.Pressed)
                 {
                     state = 0;
                 }
@@ -226,7 +226,7 @@ namespace Kit
                 }
 
                 Vector2 newLoc = (Vector2)e.GetPosition(this);
-                if(TopLevelComponent.NotifyMouseMove(state, lastMouseLoc, newLoc) && e.LeftButton == MouseButtonState.Pressed)
+                if (TopLevelComponent.NotifyMouseMove(state, lastMouseLoc, newLoc) && e.LeftButton == MouseButtonState.Pressed)
                 {
                     ReleaseCapture();
                     SendMessage(new WindowInteropHelper(this).Handle, 0xA1, 0x2, 0);

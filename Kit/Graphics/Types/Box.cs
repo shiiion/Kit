@@ -15,7 +15,7 @@ namespace Kit.Graphics.Types
         /// Dimensions represented by a vector
         /// </summary>
         public Vector2 Size { get; set; }
-        
+
         public Box(Vector2 Pos = default(Vector2), Vector2 Size = default(Vector2))
         {
             this.Pos = Pos;
@@ -50,7 +50,7 @@ namespace Kit.Graphics.Types
         {
             if (includeEdges)
             {
-                return (point.X >= Pos.X) && (point.Y >= Pos.Y) && 
+                return (point.X >= Pos.X) && (point.Y >= Pos.Y) &&
                     (point.X <= Pos.X + Size.X) && (point.Y <= Pos.Y + Size.Y);
             }
             else

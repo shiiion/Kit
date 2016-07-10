@@ -105,7 +105,7 @@ namespace Kit.Graphics.Components
 
         protected override void OnMouseInput(Vector2 clickLocation, MouseState mouseFlags)
         {
-            if(closeButton.Contains(clickLocation))
+            if (closeButton.Contains(clickLocation))
             {
                 Focused = false;
             }
@@ -114,7 +114,7 @@ namespace Kit.Graphics.Components
 
         protected override void OnUpdate()
         {
-            lock(redrawLock)
+            lock (redrawLock)
             {
                 Vector2 cursorLoc = GetCursorPosition() - topParent.WindowLocation;
                 if (topParent.Contains(cursorLoc))
@@ -126,14 +126,14 @@ namespace Kit.Graphics.Components
                 }
                 else
                 {
-                    if(fadingAnimation.AnimationTag.Equals("fadein"))
+                    if (fadingAnimation.AnimationTag.Equals("fadein"))
                     {
                         fadingAnimation.BeginAnimation(time, "fadeout");
                     }
                 }
                 fadingAnimation.StepAnimation(time);
 
-                if(!fadingAnimation.AnimationOver() && fadingAnimation.Animating)
+                if (!fadingAnimation.AnimationOver() && fadingAnimation.Animating)
                 {
                     redraw = true;
                 }
@@ -143,9 +143,9 @@ namespace Kit.Graphics.Components
 
         protected override bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
-            if(state == MouseState.Left)
+            if (state == MouseState.Left)
             {
-                if((Contains(start) || Contains(end)) && Focused)
+                if ((Contains(start) || Contains(end)) && Focused)
                 {
                     return true;
                 }
@@ -155,15 +155,15 @@ namespace Kit.Graphics.Components
 
         public override void PreDrawComponent(KitBrush brush)
         {
-            if(fadingAnimation.AnimationOver())
+            if (fadingAnimation.AnimationOver())
             {
                 Redraw = false;
             }
-            if(fadingAnimation.AnimationTag.Equals("fadein"))
+            if (fadingAnimation.AnimationTag.Equals("fadein"))
             {
                 Opacity = fadingAnimation.GetGradient();
             }
-            else if(fadingAnimation.AnimationTag.Equals("fadeout"))
+            else if (fadingAnimation.AnimationTag.Equals("fadeout"))
             {
                 Opacity = 1 - fadingAnimation.GetGradient();
             }
@@ -175,7 +175,7 @@ namespace Kit.Graphics.Components
         protected override void DrawComponent(KitBrush brush)
         {
             //REFACTOR TO ANIMATION CLASS
-            if(fadingAnimation.Animating)
+            if (fadingAnimation.Animating)
             {
                 brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, BarColor, 5, 5);
                 return;

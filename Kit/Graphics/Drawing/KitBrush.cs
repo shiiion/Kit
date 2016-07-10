@@ -32,7 +32,7 @@ namespace Kit.Graphics.Drawing
         {
             lineBrush = new Pen(colorBrush, thickness);
         }
-        
+
         public void SetColor(Color color)
         {
             colorBrush = new SolidColorBrush(color);
@@ -74,7 +74,7 @@ namespace Kit.Graphics.Drawing
         {
             FormattedText ft = new FormattedText(text, System.Globalization.CultureInfo.GetCultureInfo("en-us"),
                     FlowDirection.LeftToRight, font.NormalFont, font.FontSize, Brushes.Red);
-            
+
             return new Vector2(ft.WidthIncludingTrailingWhitespace, ft.Height);
         }
 
@@ -92,7 +92,7 @@ namespace Kit.Graphics.Drawing
                 FormattedText ft = new FormattedText(text, System.Globalization.CultureInfo.GetCultureInfo("en-us"),
                     FlowDirection.LeftToRight, font.NormalFont, font.FontSize, colorBrush);
                 renderer.DrawText(ft, (Point)location);
-                
+
             }
             else
             {
@@ -134,7 +134,7 @@ namespace Kit.Graphics.Drawing
             Rect drawArea = new Rect(rectangle.Pos.X, rectangle.Pos.Y, rectangle.Size.X, rectangle.Size.Y);
 
             SetColor(color);
-            
+
             if (filled)
             {
                 renderer.DrawRectangle(colorBrush, null, drawArea);
@@ -168,7 +168,7 @@ namespace Kit.Graphics.Drawing
 
         public void PushClip(Vector2 pos, Vector2 size)
         {
-            if(renderer == null)
+            if (renderer == null)
             {
                 //THROW EXC
             }

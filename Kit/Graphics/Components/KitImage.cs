@@ -15,7 +15,7 @@ namespace Kit.Graphics.Components
 
         private string imagePath;
         public string ImagePath
-        { 
+        {
             get { return imagePath; }
             set
             {

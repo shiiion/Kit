@@ -86,7 +86,7 @@ namespace Kit.Graphics.Components
 
         public void NotifyTextInput(string text)
         {
-            foreach(KitComponent child in Children)
+            foreach (KitComponent child in Children)
             {
                 child._NotifyTextInput(text);
             }
@@ -95,7 +95,7 @@ namespace Kit.Graphics.Components
         public bool NotifyMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
             bool ret = false;
-            foreach(KitComponent child in Children)
+            foreach (KitComponent child in Children)
             {
                 ret |= child._NotifyMouseMove(state, start, end);
             }

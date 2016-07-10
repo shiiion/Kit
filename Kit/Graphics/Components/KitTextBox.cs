@@ -124,14 +124,14 @@ namespace Kit.Graphics.Components
         {
             if ((Focused || TextField.Focused) && state == MouseState.Left)
             {
-                if(!formatter.HighlightEnabled())
+                if (!formatter.HighlightEnabled())
                 {
                     formatter.BeginHighlight();
                     Redraw = true;
                     dashOn = false;
                     lastFlashTime = time;
                 }
-                if(formatter.InsertHighlightEndAt(end - TextField.GetAbsoluteLocation()))
+                if (formatter.InsertHighlightEndAt(end - TextField.GetAbsoluteLocation()))
                 {
                     Redraw = true;
                     dashOn = false;
