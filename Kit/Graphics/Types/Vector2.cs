@@ -6,7 +6,7 @@ namespace Kit.Graphics.Types
     /// <summary>
     /// Container used to store two doubles, generally for position, dimension, and scaling purposes
     /// </summary>
-    public struct Vector2
+    public struct Vector2 : IEquatable<Vector2>
     {
         public static Vector2 Zero { get; }
 
@@ -107,6 +107,11 @@ namespace Kit.Graphics.Types
         public static explicit operator Vector2(Point cast)
         {
             return new Vector2(cast.X, cast.Y);
+        }
+
+        public bool Equals(Vector2 obj)
+        {
+            return obj.X == X && obj.Y == Y;
         }
 
         public override string ToString()

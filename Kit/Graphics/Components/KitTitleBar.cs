@@ -112,6 +112,9 @@ namespace Kit.Graphics.Components
             base.OnMouseInput(clickLocation, mouseFlags);
         }
 
+        private Vector2 hover;
+        private double hoverTime;
+
         protected override void OnUpdate()
         {
             lock (redrawLock)
@@ -121,12 +124,26 @@ namespace Kit.Graphics.Components
                 {
                     if (!fadingAnimation.Animating || fadingAnimation.AnimationTag.Equals("fadeout"))
                     {
+                        hoverTime = time;
+                        hover = cursorLoc;
                         fadingAnimation.BeginAnimation(time, "fadein");
+                    }
+                    if(!cursorLoc.Equals(hover) || closeButton.IsPressed)
+                    {
+                        hoverTime = time;
+                    }
+                    if(time - hoverTime >= 3000 && !fadingAnimation.AnimationTag.Equals("fadeouthover"))
+                    {
+                        fadingAnimation.BeginAnimation(time, "fadeouthover");
+                    }
+                    if(fadingAnimation.AnimationTag.Equals("fadeouthover") && (time - hoverTime < 3000))
+                    {
+                        fadingAnimation.BeginAnimation(time, "fadeinhover");
                     }
                 }
                 else
                 {
-                    if (fadingAnimation.AnimationTag.Equals("fadein"))
+                    if (fadingAnimation.AnimationTag.Contains("fadein"))
                     {
                         fadingAnimation.BeginAnimation(time, "fadeout");
                     }
@@ -137,6 +154,7 @@ namespace Kit.Graphics.Components
                 {
                     redraw = true;
                 }
+                hover = cursorLoc;
             }
             base.OnUpdate();
         }
@@ -159,11 +177,11 @@ namespace Kit.Graphics.Components
             {
                 Redraw = false;
             }
-            if (fadingAnimation.AnimationTag.Equals("fadein"))
+            if (fadingAnimation.AnimationTag.Contains("fadein"))
             {
                 Opacity = fadingAnimation.GetGradient();
             }
-            else if (fadingAnimation.AnimationTag.Equals("fadeout"))
+            else if (fadingAnimation.AnimationTag.Contains("fadeout"))
             {
                 Opacity = 1 - fadingAnimation.GetGradient();
             }
@@ -181,7 +199,6 @@ namespace Kit.Graphics.Components
                 return;
             }
             Redraw = false;
-
         }
     }
 }
