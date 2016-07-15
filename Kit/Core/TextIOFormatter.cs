@@ -1,4 +1,5 @@
 ﻿using System.Windows.Input;
+using System.Collections;
 using Kit.Graphics.Types;
 using Kit.Graphics.Components;
 using Kit.Graphics.Drawing;
@@ -32,6 +33,33 @@ namespace Kit.Core
             }
             return System.Math.Min(Start, End);
         }
+
+        public string GetHighlightedText(string text)
+        {
+            int begin = GetFirstIndex();
+            int end = GetLastIndex();
+            if(begin == -1)
+            {
+                return "";
+            }
+            if(end == -1)
+            {
+                end = text.Length;
+            }
+            return text.Substring(begin, end - begin);
+        }
+    }
+
+    public struct FormatterState
+    {
+        public FormatterState(string text, int loc)
+        {
+            CurText = text;
+            CursorLoc = loc;
+        }
+
+        public string CurText;
+        public int CursorLoc;
     }
 
     public class TextIOFormatter
@@ -46,7 +74,10 @@ namespace Kit.Core
 
         public KitText FormatComponent { get; set; }
 
-        private Highlight textHighlight;
+        protected Highlight textHighlight;
+
+        protected Stack undoStack;
+        protected Stack redoStack;
 
         public TextIOFormatter(KitText component)
         {
@@ -55,17 +86,16 @@ namespace Kit.Core
             FormatComponent = component;
             textHighlight = new Highlight();
             EndHighlight();
+            undoStack = new Stack();
+            redoStack = new Stack();
+            undoStack.Push(new FormatterState("", 0));
         }
 
-        private bool moveCursor(Key direction, string traverseString)
+        protected virtual bool moveCursor(Key direction, string traverseString)
         {
             if (traverseString.Length == 0)
             {
-                if (direction == Key.Left || direction == Key.Right)
-                {
-                    return true;
-                }
-                return false;
+                return direction == Key.Left || direction == Key.Right;
             }
             switch (direction)
             {
@@ -108,18 +138,18 @@ namespace Kit.Core
                 }
                 EndHighlight();
             }
-            if (textHighlight.Enabled)
+            else if (textHighlight.Enabled)
             {
                 textHighlight.End = CursorLoc;
             }
             return true;
         }
 
-        private void relocateCursor()
+        private void relocateCursor(int len)
         {
             if (CursorLoc != CURSOR_END)
             {
-                CursorLoc++;
+                CursorLoc += len;
             }
         }
 
@@ -148,7 +178,7 @@ namespace Kit.Core
             }
         }
 
-        private void deletePrevChar()
+        protected virtual void deletePrevChar()
         {
             if (Highlighting())
             {
@@ -166,7 +196,7 @@ namespace Kit.Core
             }
         }
 
-        private void deleteNextChar()
+        protected virtual void deleteNextChar()
         {
             if (Highlighting())
             {
@@ -183,44 +213,42 @@ namespace Kit.Core
             }
         }
 
-        private double getTextOffset(int loc)
+        protected virtual double getTextOffset(string text, int loc)
         {
             string sub;
-            if (loc == 0)
+            if (loc == CURSOR_END)
             {
-                return 0;
-            }
-            else if (loc == CURSOR_END)
-            {
-                sub = FormatComponent.Text;
+                sub = text;
             }
             else
             {
-                sub = FormatComponent.Text.Substring(0, loc);
+                sub = text.Substring(0, loc);
             }
-            Vector2 bounds = Graphics.Drawing.KitBrush.GetTextBounds(sub, FormatComponent.Font);
+            Vector2 bounds = KitBrush.GetTextBounds(sub, FormatComponent.Font);
 
             return bounds.X;
         }
 
-        private int getIndexAtLocation(Vector2 location)
+        protected virtual int getIndexAtLocation(string text, Vector2 location)
         {
             int ret;
-            if (location.X <= 0)
-            {
-                ret = 0;
-            }
-            else if (location.X >= FormatComponent.Size.X)
+            Vector2 fullDims = KitBrush.GetTextBounds(text, FormatComponent.Font);
+
+            if (location.X >= fullDims.X)
             {
                 ret = CURSOR_END;
+            }
+            else if (location.X <= 0)
+            {
+                ret = 0;
             }
             else
             {
                 int i = 0;
-                for (; i < FormatComponent.Text.Length; i++)
+                for (; i < text.Length; i++)
                 {
-                    Vector2 textDims = KitBrush.GetTextBounds(FormatComponent.Text.Substring(0, i), FormatComponent.Font);
-                    Vector2 nextTextDims = KitBrush.GetTextBounds(FormatComponent.Text.Substring(0, i + 1), FormatComponent.Font);
+                    Vector2 textDims = KitBrush.GetTextBounds(text.Substring(0, i), FormatComponent.Font);
+                    Vector2 nextTextDims = KitBrush.GetTextBounds(text.Substring(0, i + 1), FormatComponent.Font);
                     if (location.X >= textDims.X && location.X <= nextTextDims.X)
                     {
                         if (location.X - textDims.X > nextTextDims.X - location.X)
@@ -230,16 +258,70 @@ namespace Kit.Core
                         break;
                     }
                 }
-                if (i == FormatComponent.Text.Length)
-                {
-                    i = CURSOR_END;
-                }
                 ret = i;
             }
             return ret;
         }
 
-        public void InsertText(string text)
+        protected virtual bool shouldPushUndo(Key keyPress)
+        {
+            return (keyPress == Key.Delete && CursorLoc != CURSOR_END) ||
+                (keyPress == Key.Back && FormatComponent.Text.Length != 0 && CursorLoc != 0) ||
+                ((keyPress == Key.Delete || keyPress == Key.Back) && Highlighting()) ||
+                (undoStack.Count == 0) ||
+                (CtrlDown && keyPress == Key.V);
+        }
+
+        protected virtual bool OnCtrlKey(Key key)
+        {
+            if (key == Key.A)
+            {
+                BeginHighlight();
+                textHighlight.Start = 0;
+                textHighlight.End = CURSOR_END;
+                CursorLoc = CURSOR_END;
+                return true;
+            }
+            else if (key == Key.Z)
+            {
+                EndHighlight();
+                Undo();
+                return true;
+            }
+            else if (key == Key.Y)
+            {
+                EndHighlight();
+                Redo();
+                return true;
+            }
+            else if (key == Key.V)
+            {
+                if (System.Windows.Forms.Clipboard.ContainsText())
+                {
+                    InsertText(System.Windows.Forms.Clipboard.GetText());
+                }
+                return true;
+            }
+            else if (key == Key.C)
+            {
+                if (Highlighting())
+                {
+                    System.Windows.Forms.Clipboard.SetText(textHighlight.GetHighlightedText(FormatComponent.Text));
+                }
+            }
+            return false;
+        }
+
+        private void pushUndo(Key curKey)
+        {
+            if (shouldPushUndo(curKey))
+            {
+                undoStack.Push(new FormatterState(FormatComponent.Text, CursorLoc));
+                redoStack.Clear();
+            }
+        }
+
+        public virtual void InsertText(string text)
         {
             if (Highlighting())
             {
@@ -255,7 +337,7 @@ namespace Kit.Core
                 FormatComponent.Text = FormatComponent.Text.Insert(CursorLoc, text);
             }
 
-            relocateCursor();
+            relocateCursor(text.Length);
         }
 
         public void BeginHighlight()
@@ -274,6 +356,11 @@ namespace Kit.Core
 
         public bool HandleKeyPress(Key key)
         {
+            pushUndo(key);
+            if (CtrlDown)
+            {
+                return OnCtrlKey(key);
+            }
             bool shouldRedraw = moveCursor(key, FormatComponent.Text);
 
             if (key == Key.Back)
@@ -302,18 +389,6 @@ namespace Kit.Core
                 EndHighlight();
                 return true;
             }
-            else if (key == Key.A)
-            {
-                if (CtrlDown)
-                {
-                    BeginHighlight();
-                    textHighlight.Start = 0;
-                    textHighlight.End = CURSOR_END;
-                    CursorLoc = CURSOR_END;
-                    return true;
-                }
-            }
-
             return shouldRedraw;
         }
 
@@ -327,34 +402,29 @@ namespace Kit.Core
             return textHighlight.Enabled && (textHighlight.End != textHighlight.Start);
         }
 
-        public Box GetHighlightRect()
+        public Box GetHighlightRect(string text)
         {
             Box ret = new Box();
 
-            double max = getTextOffset(textHighlight.GetLastIndex());
-            double min = getTextOffset(textHighlight.GetFirstIndex());
+            double max = getTextOffset(text, textHighlight.GetLastIndex());
+            double min = getTextOffset(text, textHighlight.GetFirstIndex());
 
             ret.Size = new Vector2(max - min, FormatComponent.Size.Y);
-            ret.Pos = new Vector2(min, FormatComponent.Location.Y);
+            ret.Pos = new Vector2(min);
 
             return ret;
         }
 
-        /// <summary>
-        /// attempts to make a vector which places the cursor at the center of visibleWidth
-        /// </summary>
-        /// <param name="visibleWidth">width of text's parent component</param>
-        /// <returns></returns>
-        public Vector2 GetVisibleOffset(double visibleWidth)
+        public Vector2 GetVisibleOffset(string text, double visibleWidth, int loc)
         {
             Vector2 ret = new Vector2(0, 0);
-            double endOffset = getTextOffset(CURSOR_END);
+            double endOffset = getTextOffset(text, CURSOR_END);
             if (endOffset < visibleWidth)
             {
                 return ret;
             }
 
-            double cursorOffset = getTextOffset(CursorLoc);
+            double cursorOffset = getTextOffset(text, loc);
 
 
             if ((endOffset - cursorOffset) < (visibleWidth / 2))
@@ -402,7 +472,7 @@ namespace Kit.Core
 
         public double GetCursorOffset()
         {
-            return getTextOffset(CursorLoc);
+            return getTextOffset(FormatComponent.Text, CursorLoc);
         }
 
         public bool InsertHighlightEndAt(Vector2 relativeLocation)
@@ -410,7 +480,7 @@ namespace Kit.Core
             if (textHighlight.Enabled)
             {
                 int end = textHighlight.End;
-                textHighlight.End = getIndexAtLocation(relativeLocation);
+                textHighlight.End = getIndexAtLocation(FormatComponent.Text, relativeLocation);
                 CursorLoc = textHighlight.End;
                 return end != textHighlight.End;
             }
@@ -419,7 +489,29 @@ namespace Kit.Core
 
         public void InsertCursorAt(Vector2 relativeLocation)
         {
-            CursorLoc = getIndexAtLocation(relativeLocation);
+            CursorLoc = getIndexAtLocation(FormatComponent.Text, relativeLocation);
+        }
+
+        public virtual void Undo()
+        {
+            if (undoStack.Count > 0)
+            {
+                FormatterState top = (FormatterState)undoStack.Pop();
+                redoStack.Push(new FormatterState(FormatComponent.Text, CursorLoc));
+                CursorLoc = top.CursorLoc;
+                FormatComponent.Text = top.CurText;
+            }
+        }
+
+        public virtual void Redo()
+        {
+            if (redoStack.Count > 0)
+            {
+                FormatterState top = (FormatterState)redoStack.Pop();
+                undoStack.Push(new FormatterState(FormatComponent.Text, CursorLoc));
+                CursorLoc = top.CursorLoc;
+                FormatComponent.Text = top.CurText;
+            }
         }
     }
 }

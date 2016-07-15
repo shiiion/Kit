@@ -28,33 +28,27 @@ namespace Kit.Graphics.Components
             }
         }
 
-        protected object redrawLock = new object();
         protected bool redraw;
         public bool Redraw
         {
             get
             {
                 bool ret;
-                lock (redrawLock)
+                ret = redraw;
+                foreach (KitComponent child in Children)
                 {
-                    ret = redraw;
-                    foreach (KitComponent child in Children)
+                    ret |= child.Redraw;
+                    if (ret)
                     {
-                        ret |= child.Redraw;
-                        if (ret)
-                        {
-                            break;
-                        }
+                        break;
                     }
                 }
                 return ret;
             }
+
             set
             {
-                lock (redrawLock)
-                {
-                    redraw = value;
-                }
+                redraw = value;
             }
         }
 
@@ -102,9 +96,12 @@ namespace Kit.Graphics.Components
 
         public void _DrawComponent(KitBrush brush)
         {
-            DrawComponent(brush);
-            Draw?.Invoke();
-            OnDraw();
+            lock (ComponentLock)
+            {
+                DrawComponent(brush);
+                Draw?.Invoke();
+                OnDraw();
+            }
         }
 
         private KitComponent getFrontComponentFromBranch(Vector2 location)
@@ -172,8 +169,8 @@ namespace Kit.Graphics.Components
 
         KitFont debugFont = new KitFont()
         {
-            NormalFont = new Typeface("Veranda"),
-            FontSize = 10
+            NormalFont = new Typeface("Consolas"),
+            FontSize = 8
         };
 
         public void DrawComponentDebugInfo(KitBrush brush)
@@ -205,11 +202,10 @@ namespace Kit.Graphics.Components
             {
                 Vector2 loc = GetAbsoluteLocation();
                 brush.PushClip(loc, Size);
-            }
-
-            if (parent != null)
-            {
-                parent.pushNecessaryClips(brush);
+                if (parent != null)
+                {
+                    parent.pushNecessaryClips(brush);
+                }
             }
         }
 
@@ -218,10 +214,10 @@ namespace Kit.Graphics.Components
             if (Masked)
             {
                 brush.Pop();
-            }
-            if (parent != null)
-            {
-                parent.popNecessaryClips(brush);
+                if (parent != null)
+                {
+                    parent.popNecessaryClips(brush);
+                }
             }
         }
     }

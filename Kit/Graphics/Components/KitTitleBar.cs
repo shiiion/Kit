@@ -53,8 +53,9 @@ namespace Kit.Graphics.Components
                 Size = new Vector2(topParent.Size.X, 22);
             };
 
-            titleComponent = new KitText(title, "Consolas", 13, new Vector2(5))
+            titleComponent = new KitText(title, "Consolas", 13)
             {
+                Location = new Vector2(5),
                 Origin = KitAnchoring.LeftCenter,
                 Anchor = KitAnchoring.LeftCenter,
                 TextColor = Color.FromArgb(barColor.A, 255, 255, 255),
@@ -117,45 +118,42 @@ namespace Kit.Graphics.Components
 
         protected override void OnUpdate()
         {
-            lock (redrawLock)
+            Vector2 cursorLoc = GetCursorPosition() - topParent.WindowLocation;
+            if (topParent.Contains(cursorLoc))
             {
-                Vector2 cursorLoc = GetCursorPosition() - topParent.WindowLocation;
-                if (topParent.Contains(cursorLoc))
+                if (!fadingAnimation.Animating || fadingAnimation.AnimationTag.Equals("fadeout"))
                 {
-                    if (!fadingAnimation.Animating || fadingAnimation.AnimationTag.Equals("fadeout"))
-                    {
-                        hoverTime = time;
-                        hover = cursorLoc;
-                        fadingAnimation.BeginAnimation(time, "fadein");
-                    }
-                    if(!cursorLoc.Equals(hover) || closeButton.IsPressed)
-                    {
-                        hoverTime = time;
-                    }
-                    if(time - hoverTime >= 3000 && !fadingAnimation.AnimationTag.Equals("fadeouthover"))
-                    {
-                        fadingAnimation.BeginAnimation(time, "fadeouthover");
-                    }
-                    if(fadingAnimation.AnimationTag.Equals("fadeouthover") && (time - hoverTime < 3000))
-                    {
-                        fadingAnimation.BeginAnimation(time, "fadeinhover");
-                    }
+                    hoverTime = time;
+                    hover = cursorLoc;
+                    fadingAnimation.BeginAnimation(time, "fadein");
                 }
-                else
+                if (!cursorLoc.Equals(hover) || closeButton.IsPressed)
                 {
-                    if (fadingAnimation.AnimationTag.Contains("fadein"))
-                    {
-                        fadingAnimation.BeginAnimation(time, "fadeout");
-                    }
+                    hoverTime = time;
                 }
-                fadingAnimation.StepAnimation(time);
-
-                if (!fadingAnimation.AnimationOver() && fadingAnimation.Animating)
+                if (time - hoverTime >= 3000 && !fadingAnimation.AnimationTag.Equals("fadeouthover"))
                 {
-                    redraw = true;
+                    fadingAnimation.BeginAnimation(time, "fadeouthover");
                 }
-                hover = cursorLoc;
+                if (fadingAnimation.AnimationTag.Equals("fadeouthover") && (time - hoverTime < 3000))
+                {
+                    fadingAnimation.BeginAnimation(time, "fadeinhover");
+                }
             }
+            else
+            {
+                if (fadingAnimation.AnimationTag.Contains("fadein"))
+                {
+                    fadingAnimation.BeginAnimation(time, "fadeout");
+                }
+            }
+            fadingAnimation.StepAnimation(time);
+
+            if (!fadingAnimation.AnimationOver() && fadingAnimation.Animating)
+            {
+                redraw = true;
+            }
+            hover = cursorLoc;
             base.OnUpdate();
         }
 

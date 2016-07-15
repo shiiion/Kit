@@ -65,19 +65,26 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Core\CSCodeCompiler.cs" />
     <Compile Include="Core\Delegates\BaseDelegates.cs" />
+    <Compile Include="Core\Exceptions\CompilerErrorException.cs" />
     <Compile Include="Core\Exceptions\TimerStoppedException.cs" />
     <Compile Include="Core\GlobalTimer.cs" />
     <Compile Include="Core\InputData.cs" />
+    <Compile Include="Core\MultilineIOFormatter.cs" />
     <Compile Include="Core\TextIOFormatter.cs" />
     <Compile Include="Graphics\Components\IContainer.cs" />
+    <Compile Include="Graphics\Components\IScrollable.cs" />
     <Compile Include="Graphics\Components\KitButton.cs" />
     <Compile Include="Graphics\Components\KitComponent.cs" />
     <Compile Include="Graphics\Components\KitComponent_Render.cs" />
     <Compile Include="Graphics\Components\KitImage.cs" />
+    <Compile Include="Graphics\Components\KitScrollbar.cs" />
     <Compile Include="Graphics\Components\KitText.cs" />
+    <Compile Include="Graphics\Components\KitTextArea.cs" />
     <Compile Include="Graphics\Components\KitTextBox.cs" />
     <Compile Include="Graphics\Components\KitTitleBar.cs" />
+    <Compile Include="Graphics\Components\KitRevealText.cs" />
     <Compile Include="Graphics\Components\TopLevelComponent.cs" />
     <Compile Include="Graphics\Drawing\AnimationControl.cs" />
     <Compile Include="Graphics\Drawing\KitBrush.cs" />

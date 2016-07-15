@@ -15,11 +15,11 @@ namespace Kit.Graphics.Components
 
         public Vector2 WindowLocation { get; set; }
 
-        public TopLevelComponent(KitWindow owner, VoidDelegate onClose)
+        public TopLevelComponent(KitWindow owner, string title, VoidDelegate onClose)
             : base(Vector2.Zero, new Vector2(owner.Width, owner.Height))
         {
             drawOrder = new List<KitComponent>();
-            titleBar = new KitTitleBar(System.Windows.Media.Color.FromArgb(220, 127, 127, 127), this, onClose, "Titlebar");
+            titleBar = new KitTitleBar(System.Windows.Media.Color.FromArgb(220, 127, 127, 127), this, onClose, title);
             AddChild(titleBar);
         }
 

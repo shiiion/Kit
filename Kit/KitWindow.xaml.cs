@@ -31,7 +31,7 @@ namespace Kit
 
             lastMouseLoc = new Vector2(-1, -1);
 
-            TopLevelComponent = new TopLevelComponent(this, () =>
+            TopLevelComponent = new TopLevelComponent(this, "Kit", () =>
             {
                 lock (App.WindowListLock)
                 {
@@ -40,30 +40,10 @@ namespace Kit
                 }
             });
             componentBrush = new KitBrush();
-
-            KitImage img2 = new KitImage(@"D:\jpeg\VqGMB7T.png")
-            {
-                Origin = KitAnchoring.Center,
-                Anchor = KitAnchoring.Center,
-                ComponentDepth = 0.5,
-                Location = new Vector2(0, 22)
-            };
-
-            KitTextBox ktb = new KitTextBox(12, 200)
-            {
-                Origin = KitAnchoring.Center,
-                Anchor = KitAnchoring.Center,
-                ComponentDepth = 1.0
-            };
-            TopLevelComponent.AddChild(img2);
-            img2.Size = TopLevelComponent.Size;
-            img2.AddChild(ktb);
-
             SizeChanged += (o, e) =>
             {
                 TopLevelComponent.Size = new Vector2(e.NewSize.Width, e.NewSize.Height);
                 TopLevelComponent.Redraw = true;
-                img2.Size = TopLevelComponent.Size;
             };
 
             CompositionTarget.Rendering += (o, e) =>
@@ -88,10 +68,50 @@ namespace Kit
             {
                 windowLoc = new Vector2(Left, Top);
             };
+
+            KitTextArea area = new KitTextArea("Consolas", 12, new Vector2(340, 300))
+            {
+                Location = new Vector2(5, 22)
+            };
+
+            KitButton button = new KitButton(@"D:\jpeg\compile.png", @"D:\jpeg\compiledown.png", new Vector2(50, 50))
+            {
+                Anchor = KitAnchoring.RightCenter,
+                Origin = KitAnchoring.LeftCenter,
+                Location = new Vector2(2)
+            };
+
+            KitText compileWindow = new KitText("", "Comic Sans MS Bold")
+            {
+                Anchor = KitAnchoring.TopRight,
+                Origin = KitAnchoring.TopLeft,
+                Location = new Vector2(50 + 2 + 10),
+                TextColor = Colors.Red
+            };
+
+            button.Released += () =>
+            {
+                string ret = "";
+                try
+                {
+                    object rv = CSCodeCompiler.ExecuteCode(area.TextField.Text, "mom", "dad", "start", true, null);
+                    if(rv is string)
+                    {
+                        ret = rv as string;
+                    }
+                }
+                catch(Core.Exceptions.CompilerErrorException e)
+                {
+                    compileWindow.Text = e.Message;
+                    return;
+                }
+                compileWindow.Text = ret;
+            };
+
+            TopLevelComponent.AddChild(area);
+            area.AddChild(button);
+            area.AddChild(compileWindow);
         }
-        [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool IsWindowVisible(IntPtr hWnd);
 
         protected override void OnRender(DrawingContext drawingContext)
         {

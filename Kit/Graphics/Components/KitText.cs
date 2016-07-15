@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Windows;
 using Kit.Graphics.Drawing;
 using Kit.Graphics.Types;
 
@@ -29,28 +26,28 @@ namespace Kit.Graphics.Components
 
         public Color TextColor { get; set; }
 
-        public KitText(string text = "", string font = "Veranda", double ptSize = 12, Vector2 location = default(Vector2), Vector2 size = default(Vector2))
-            : base(location, size)
+        public KitText(string text = "", string font = "Consolas", double ptSize = 12)
+            : base()
         {
             Font = new KitFont()
             {
                 FontSize = ptSize
             };
-            LoadFont(font);
+            LoadFont(font, FontStyles.Normal, FontWeights.Normal);
             Text = text;
             TextColor = Colors.Black;
         }
 
-        public void LoadFont(string font)
+        public void LoadFont(string font, FontStyle style, FontWeight weight)
         {
             Font.IsCustom = false;
-            Font.NormalFont = new Typeface(font);
+            Font.NormalFont = new Typeface(new FontFamily(font), style, weight, FontStretches.Normal);
         }
 
         private Vector2 getTextSize(string text)
         {
             FormattedText formattedText = new FormattedText(
-                text, System.Globalization.CultureInfo.GetCultureInfo("en-us"), System.Windows.FlowDirection.LeftToRight,
+                text, System.Globalization.CultureInfo.GetCultureInfo("en-us"), FlowDirection.LeftToRight,
                 Font.NormalFont, Font.FontSize, Brushes.Red);
             return new Vector2(formattedText.Width, formattedText.Height);
         }

@@ -2,6 +2,7 @@
 using System.Windows.Input;
 using Kit.Core;
 using Kit.Graphics.Drawing;
+using System.Windows.Media;
 using Kit.Graphics.Types;
 
 namespace Kit.Graphics.Components
@@ -9,21 +10,27 @@ namespace Kit.Graphics.Components
     class KitTextBox : KitComponent
     {
         private double lastFlashTime;
-        private bool dashOn;
+        protected bool dashOn;
 
         public KitText TextField { get; set; }
 
-        private TextIOFormatter formatter;
+        public Color BackColor { get; set; }
 
-        public KitTextBox(double fontSize, double maxWidth, Vector2 location = default(Vector2))
+        public Color HighlightColor { get; set; }
+
+        protected TextIOFormatter formatter;
+
+        public KitTextBox(string font, double fontSize, double maxWidth, Vector2 location = default(Vector2))
             : base(location)
         {
-            TextField = new KitText("TextField", "Consolas", fontSize, Vector2.Zero, Size)
+            TextField = new KitText("", font, fontSize)
             {
                 Anchor = KitAnchoring.LeftCenter,
                 Origin = KitAnchoring.LeftCenter,
-                TextColor = System.Windows.Media.Colors.Black,
-                ShouldDraw = false
+                TextColor = Colors.Black,
+                ShouldDraw = false,
+                Size = Size,
+                Masked = true
             };
             formatter = new TextIOFormatter(TextField);
 
@@ -32,6 +39,8 @@ namespace Kit.Graphics.Components
             Vector2 TextMetrics = KitBrush.GetTextBounds("|", TextField.Font);
             Size = new Vector2(maxWidth, TextMetrics.Y + 4);
             lastFlashTime = time;
+            BackColor = Color.FromArgb(0x7f, 0xff, 0, 0);
+            HighlightColor = Color.FromArgb(0x7f, 0, 0, 0xff);
         }
 
         public override void PreDrawComponent(KitBrush brush)
@@ -68,15 +77,20 @@ namespace Kit.Graphics.Components
             base.OnUpdate();
         }
 
+        protected void forceRedrawCursor()
+        {
+            lastFlashTime = time;
+            dashOn = true;
+            Redraw = true;
+        }
+
         protected override void OnTextInput(string text)
         {
             if ((Focused || TextField.Focused)
                 && text.Length > 0 && text[0] >= ' ')
             {
                 formatter.InsertText(text);
-                lastFlashTime = time;
-                dashOn = true;
-                Redraw = true;
+                forceRedrawCursor();
             }
             base.OnTextInput(text);
         }
@@ -90,12 +104,9 @@ namespace Kit.Graphics.Components
                 {
                     if (formatter.HandleKeyPress(key))
                     {
-                        lastFlashTime = time;
-                        dashOn = true;
-                        Redraw = true;
+                        forceRedrawCursor();
                     }
                 }
-
             }
             base.OnKeyInput(key, state);
         }
@@ -106,16 +117,12 @@ namespace Kit.Graphics.Components
             {
                 Vector2 relativeClick = clickLocation - TextField.GetAbsoluteLocation();
                 formatter.InsertCursorAt(relativeClick);
-                dashOn = true;
-                Redraw = true;
-                lastFlashTime = time;
+                forceRedrawCursor();
                 formatter.EndHighlight();
             }
             else if ((mouseFlags & MouseState.Down) == MouseState.Down)
             {
-                dashOn = false;
-                lastFlashTime = time;
-                Redraw = true;
+                forceRedrawCursor();
             }
             base.OnMouseInput(clickLocation, mouseFlags);
         }
@@ -127,55 +134,67 @@ namespace Kit.Graphics.Components
                 if (!formatter.HighlightEnabled())
                 {
                     formatter.BeginHighlight();
-                    Redraw = true;
-                    dashOn = false;
-                    lastFlashTime = time;
+                    forceRedrawCursor();
                 }
                 if (formatter.InsertHighlightEndAt(end - TextField.GetAbsoluteLocation()))
                 {
-                    Redraw = true;
-                    dashOn = false;
-                    lastFlashTime = time;
+                    forceRedrawCursor();
                 }
             }
             return false;
         }
 
-        protected override void DrawComponent(KitBrush brush)
+        protected virtual void DrawCursor(KitBrush brush, Vector2 absLoc)
         {
-            Vector2 lineStart = GetAbsoluteLocation();
+            Vector2 lineStart = absLoc;
             Vector2 lineEnd = new Vector2(lineStart.X, lineStart.Y + Size.Y);
-            System.Windows.Media.Color nc = System.Windows.Media.Color.FromArgb(0x7F, 0xFF, 0, 0);
-            brush.DrawRoundedRectangle(new Box(new Vector2(lineStart.X - 2, lineStart.Y), new Vector2(Size.X + 4, Size.Y)), true, nc, 5, 5);
 
             double pixelCursorOffset = formatter.GetCursorOffset();
-
-            TextField.Location = formatter.GetVisibleOffset(Size.X);
 
             lineStart.X += pixelCursorOffset + TextField.Location.X;
             lineEnd.X += pixelCursorOffset + TextField.Location.X;
             lineStart.Y += 1;
             lineEnd.Y -= 1;
 
+            lineStart.X = System.Math.Round(lineStart.X) + 0.5;
+            lineEnd.X = System.Math.Round(lineEnd.X) + 0.5;
+            brush.DrawLine(lineStart, lineEnd, TextField.TextColor, 1);
+            brush.DrawLine(lineStart, lineEnd, TextField.TextColor, 1);
+        }
+
+        protected virtual void DrawHighlighting(KitBrush brush)
+        {
+            Box highlightRect = formatter.GetHighlightRect(TextField.Text);
+            highlightRect.Pos += TextField.GetAbsoluteLocation();
+            brush.DrawRectangle(highlightRect, true, HighlightColor);
+        }
+
+        protected virtual void SetContentLocation()
+        {
+            TextField.Location = formatter.GetVisibleOffset(TextField.Text, Size.X, formatter.CursorLoc);
+        }
+
+        protected override void DrawComponent(KitBrush brush)
+        {
+            Vector2 absLoc = GetAbsoluteLocation();
+
+            brush.DrawRoundedRectangle(new Box(new Vector2(absLoc.X - 2, absLoc.Y), new Vector2(Size.X + 4, Size.Y)), true, BackColor, 5, 5);
+
+            SetContentLocation();
+
             pushNecessaryClips(brush);
 
             if (formatter.Highlighting())
             {
-                System.Windows.Media.Color hColor = System.Windows.Media.Color.FromArgb(0x7F, 0, 0, 0xFF);
-                Box highlightRect = formatter.GetHighlightRect();
-                highlightRect.Pos += TextField.GetAbsoluteLocation();
-                brush.DrawRectangle(highlightRect, true, hColor);
+                DrawHighlighting(brush);
             }
 
             if (dashOn && (Focused || TextField.Focused))
             {
-                lineStart.X = System.Math.Round(lineStart.X) + 0.5;
-                lineEnd.X = System.Math.Round(lineEnd.X) + 0.5;
-                brush.DrawLine(lineStart, lineEnd, TextField.TextColor, 1);
-                brush.DrawLine(lineStart, lineEnd, TextField.TextColor, 1);
+                DrawCursor(brush, absLoc);
             }
-            popNecessaryClips(brush);
 
+            popNecessaryClips(brush);
 
             TextField._DrawComponent(brush);
             base.DrawComponent(brush);

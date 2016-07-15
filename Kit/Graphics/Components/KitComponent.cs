@@ -34,6 +34,8 @@ namespace Kit.Graphics.Components
 
         public bool Draggable { get; set; }
 
+        private object componentLock;
+        public object ComponentLock { get { return componentLock; } }
 
 
         public KitAnchoring Anchor;
@@ -57,6 +59,7 @@ namespace Kit.Graphics.Components
 
         public KitComponent(Vector2 location = default(Vector2), Vector2 Size = default(Vector2))
         {
+            componentLock = new object();
             Focused = false;
             redraw = true;
             Masked = false;
@@ -140,15 +143,18 @@ namespace Kit.Graphics.Components
 
         public void UpdateSubcomponents(double CurTime)
         {
-            time = CurTime;
-
-            foreach (KitComponent child in Children)
+            lock (componentLock)
             {
-                child.UpdateSubcomponents(CurTime);
-            }
+                time = CurTime;
 
-            Update?.Invoke();
-            OnUpdate();
+                foreach (KitComponent child in Children)
+                {
+                    child.UpdateSubcomponents(CurTime);
+                }
+
+                Update?.Invoke();
+                OnUpdate();
+            }
         }
 
         protected virtual void OnMouseInput(Vector2 clickLocation, MouseState mouseFlags)
@@ -157,7 +163,7 @@ namespace Kit.Graphics.Components
         protected virtual void OnKeyInput(Key key, KeyState state)
         {
 #if DEBUG
-            if (key == Key.LeftCtrl)
+            if (key == Key.RightCtrl)
             {
                 if (state == KeyState.Press)
                 {
@@ -190,21 +196,23 @@ namespace Kit.Graphics.Components
 
         public void _NotifyMouseInput(Vector2 clickLocation, MouseState mouseFlags)
         {
-            if (Contains(clickLocation) && mouseFlags == MouseState.LeftDown)
-            {
-                Focused = true;
-            }
-            else if (mouseFlags == MouseState.LeftDown)
-            {
-                Focused = false;
-            }
-
             foreach (KitComponent child in Children)
             {
                 child._NotifyMouseInput(clickLocation, mouseFlags);
             }
-            OnMouseInput(clickLocation, mouseFlags);
-            MouseInput?.Invoke(clickLocation, mouseFlags);
+            lock (ComponentLock)
+            {
+                if (Contains(clickLocation) && mouseFlags == MouseState.LeftDown)
+                {
+                    Focused = true;
+                }
+                else if (mouseFlags == MouseState.LeftDown)
+                {
+                    Focused = false;
+                }
+                OnMouseInput(clickLocation, mouseFlags);
+                MouseInput?.Invoke(clickLocation, mouseFlags);
+            }
         }
 
         public void _NotifyTextInput(string text)
@@ -213,8 +221,11 @@ namespace Kit.Graphics.Components
             {
                 child._NotifyTextInput(text);
             }
-            OnTextInput(text);
-            TextInput?.Invoke(text);
+            lock (ComponentLock)
+            {
+                OnTextInput(text);
+                TextInput?.Invoke(text);
+            }
         }
 
         public void _NotifyKeyInput(Key key, KeyState state)
@@ -223,8 +234,11 @@ namespace Kit.Graphics.Components
             {
                 child._NotifyKeyInput(key, state);
             }
-            OnKeyInput(key, state);
-            KeyInput?.Invoke(key, state);
+            lock (ComponentLock)
+            {
+                OnKeyInput(key, state);
+                KeyInput?.Invoke(key, state);
+            }
         }
 
         public bool _NotifyMouseMove(MouseState state, Vector2 start, Vector2 end)
@@ -234,8 +248,11 @@ namespace Kit.Graphics.Components
             {
                 ret |= child._NotifyMouseMove(state, start, end);
             }
-            ret |= OnMouseMove(state, start, end);
-            MouseMove?.Invoke(state, start, end);
+            lock(ComponentLock)
+            {
+                ret |= OnMouseMove(state, start, end);
+                MouseMove?.Invoke(state, start, end);
+            }
             return ret;
         }
 
