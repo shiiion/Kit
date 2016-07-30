@@ -40,6 +40,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
@@ -82,6 +83,7 @@
     <Compile Include="Graphics\Components\KitImage.cs" />
     <Compile Include="Graphics\Components\KitScrollbar.cs" />
     <Compile Include="Graphics\Components\KitText.cs" />
+    <Compile Include="Graphics\Components\KitTextAnimation.cs" />
     <Compile Include="Graphics\Components\KitTextArea.cs" />
     <Compile Include="Graphics\Components\KitTextBox.cs" />
     <Compile Include="Graphics\Components\KitTitleBar.cs" />
@@ -112,6 +114,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -127,6 +130,12 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\XButton.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\XButtonDown.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

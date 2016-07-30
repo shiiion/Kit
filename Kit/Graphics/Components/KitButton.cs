@@ -24,6 +24,8 @@ namespace Kit.Graphics.Components
         public event VoidDelegate Pressed;
         public event VoidDelegate Released;
 
+        public bool UsingExternalResource { get; set; }
+
         public string PressedImage { get; set; }
         public string ReleasedImage { get; set; }
         private Vector2 sizeSave;

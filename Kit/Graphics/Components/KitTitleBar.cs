@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Resources;
 using System.Windows.Media;
 using System.Runtime.InteropServices;
 using Kit.Graphics.Types;
@@ -63,7 +63,9 @@ namespace Kit.Graphics.Components
                 Opacity = 0
             };
 
-            closeButton = new KitButton(@"D:\kit\XButton.png", @"D:\kit\XButtonDown.png", new Vector2(16, 16))
+            
+
+            closeButton = new KitButton(@"pack://application:,,,/Resources/XButton.png", @"pack://application:,,,/Resources/XButtonDown.png", new Vector2(16, 16))
             {
                 Origin = KitAnchoring.RightCenter,
                 Anchor = KitAnchoring.RightCenter,
