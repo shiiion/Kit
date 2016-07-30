@@ -12,8 +12,8 @@ namespace Kit.Graphics.Components
     {
         bool ContentLargerThanArea();
         Vector2 ContentDimensions();
-        void SetContentLocation(Vector2 location);
-
         void SetScrollbar(KitScrollbar scrollBar);
+
+        bool ContainsCursor(Vector2 cursorLoc);
     }
 }

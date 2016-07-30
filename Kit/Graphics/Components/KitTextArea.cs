@@ -45,11 +45,6 @@ namespace Kit.Graphics.Components
             return TextField.Size;
         }
 
-        public void SetContentLocation(Vector2 location)
-        {
-            TextField.Location = location;
-        }
-
         public void SetScrollbar(KitScrollbar scrollbar)
         {
             this.scrollbar = scrollbar;
@@ -69,6 +64,11 @@ namespace Kit.Graphics.Components
             {
                 scrollbar.SetScrollLocation(Y / scrollbar.ScrollStep + (scrollbar.ScrollLocation / (TextField.Size.Y / scrollbar.ScrollStep)));
             }
+        }
+
+        public bool ContainsCursor(Vector2 cursorLoc)
+        {
+            return Contains(cursorLoc);
         }
 
         protected override void OnTextInput(string text)
@@ -92,6 +92,7 @@ namespace Kit.Graphics.Components
                 if (scrollbar.Enabled)
                 {
                     trackCursor();
+                    trackCursor();
                 }
             }
         }
@@ -104,6 +105,8 @@ namespace Kit.Graphics.Components
                 scrollbar.OnContentSizeChange();
                 if (scrollbar.Enabled && (key == Key.Up || key == Key.Down || key == Key.Left || key == Key.Right))
                 {
+                    //HACK: run twice to scroll exactly to cursor
+                    trackCursor();
                     trackCursor();
                 }
             }

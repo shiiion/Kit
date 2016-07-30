@@ -69,9 +69,9 @@ namespace Kit
                 windowLoc = new Vector2(Left, Top);
             };
 
-            KitTextArea area = new KitTextArea("Consolas", 12, new Vector2(340, 300))
+            KitTextArea area = new KitTextArea("Consolas", 32, new Vector2(340, 300))
             {
-                Location = new Vector2(5, 22)
+                Location = new Vector2(0, 22)
             };
 
             KitText compileWindow = new KitText("", "Comic Sans MS Bold")
@@ -142,6 +142,15 @@ namespace Kit
             }
 
             base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            lock(windowLock)
+            {
+                TopLevelComponent.NotifyScroll((Vector2)e.GetPosition(this), Math.Sign(e.Delta));
+            }
+            base.OnMouseWheel(e);
         }
 
         protected override void OnMouseUp(MouseButtonEventArgs e)

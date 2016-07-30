@@ -18,6 +18,7 @@ namespace Kit.Graphics.Components
         
         public bool Enabled { get; set; }
 
+        public double ScrollAmount { get; set; }
         public double ScrollStep { get; set; }
 
         private IScrollable scrollComponent;
@@ -28,6 +29,7 @@ namespace Kit.Graphics.Components
 
         public KitScrollbar(KitComponent parent)
         {
+            ScrollAmount = 1;
             ScrollStep = 1;
             Anchor = KitAnchoring.TopRight;
             Origin = KitAnchoring.TopLeft;
@@ -88,7 +90,37 @@ namespace Kit.Graphics.Components
             }
             base.OnMouseInput(clickLocation, mouseFlags);
         }
+
+        private bool OOB(double loc)
+        {
+            return (loc < 0) || (loc > (scrollComponent.ContentDimensions().Y / ScrollStep));
+        }
         
+        protected override void OnScroll(Vector2 pos, int direction)
+        {
+            if((Contains(pos) || scrollComponent.ContainsCursor(pos)) && Enabled)
+            {
+                if (direction > 0)
+                {
+                    SetScrollLocation(ScrollLocation - ScrollAmount);
+                    if(OOB(ScrollLocation))
+                    {
+                        SetScrollLocation(0);
+                    }
+                }
+                else
+                {
+                    SetScrollLocation(ScrollLocation + ScrollAmount);
+                    if (OOB(ScrollLocation))
+                    {
+                        SetScrollLocation(scrollComponent.ContentDimensions().Y / ScrollStep);
+                    }
+                }
+                Redraw = true;
+            }
+            base.OnScroll(pos, direction);
+        }
+
         protected override bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
             if (Enabled)

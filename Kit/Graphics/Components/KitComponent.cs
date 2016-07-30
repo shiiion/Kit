@@ -50,6 +50,7 @@ namespace Kit.Graphics.Components
         public event KeyStateDelegate KeyInput;
         public event StringDelegate TextInput;
         public event MouseMoveDelegate MouseMove;
+        public event MouseScrollDelegate Scroll;
 
         public bool Focused { get; set; }
 
@@ -192,6 +193,9 @@ namespace Kit.Graphics.Components
         protected virtual void OnTextInput(string text)
         { }
 
+        protected virtual void OnScroll(Vector2 pos, int direction)
+        { }
+
         /// <returns>If the window is enabled to move</returns>
         protected virtual bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
@@ -242,6 +246,19 @@ namespace Kit.Graphics.Components
             {
                 OnKeyInput(key, state);
                 KeyInput?.Invoke(key, state);
+            }
+        }
+
+        public void _NotifyScroll(Vector2 mouseLoc, int direction)
+        {
+            foreach(KitComponent child in Children)
+            {
+                child._NotifyScroll(mouseLoc, direction);
+            }
+            lock(ComponentLock)
+            {
+                OnScroll(mouseLoc, direction);
+                Scroll?.Invoke(mouseLoc, direction);
             }
         }
 

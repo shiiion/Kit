@@ -102,6 +102,14 @@ namespace Kit.Graphics.Components
             return ret;
         }
 
+        public void NotifyScroll(Vector2 mouseLoc, int direction)
+        {
+            foreach(KitComponent child in Children)
+            {
+                child._NotifyScroll(mouseLoc, direction);
+            }
+        }
+
         public void DrawComponentTree(KitBrush brush)
         {
             brush.DrawRectangle(new Box(0, 0, Size), true, System.Windows.Media.Color.FromArgb(0x01, 0x7f, 0x7f, 0x7f));
