@@ -75,6 +75,7 @@
     <Compile Include="Core\TextIOFormatter.cs" />
     <Compile Include="Graphics\Components\IContainer.cs" />
     <Compile Include="Graphics\Components\IScrollable.cs" />
+    <Compile Include="Graphics\Components\KitBox.cs" />
     <Compile Include="Graphics\Components\KitButton.cs" />
     <Compile Include="Graphics\Components\KitComponent.cs" />
     <Compile Include="Graphics\Components\KitComponent_Render.cs" />

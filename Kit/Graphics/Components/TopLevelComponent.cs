@@ -104,6 +104,7 @@ namespace Kit.Graphics.Components
 
         public void DrawComponentTree(KitBrush brush)
         {
+            brush.DrawRectangle(new Box(0, 0, Size), true, System.Windows.Media.Color.FromArgb(0x01, 0x7f, 0x7f, 0x7f));
             foreach (KitComponent component in drawOrder)
             {
                 if (component.ShouldDraw)

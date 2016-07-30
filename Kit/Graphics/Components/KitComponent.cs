@@ -73,6 +73,10 @@ namespace Kit.Graphics.Components
             this.Size = Size;
             ComponentDepth = 0;
             Opacity = 1;
+            CustomMask = Size;
+
+            RoundedMask = false;
+            RoundingRadius = 0;
         }
 
         public void SetParent(KitComponent parent)

@@ -33,9 +33,9 @@ namespace Kit
 
             TopLevelComponent = new TopLevelComponent(this, "Kit", () =>
             {
-                lock (App.WindowListLock)
+                lock(App.RemoveLock)
                 {
-                    App.WindowList.Remove(this);
+                    App.RemoveList.Add(this);
                     Close();
                 }
             });
@@ -74,13 +74,6 @@ namespace Kit
                 Location = new Vector2(5, 22)
             };
 
-            KitButton button = new KitButton(@"D:\jpeg\compile.png", @"D:\jpeg\compiledown.png", new Vector2(50, 50))
-            {
-                Anchor = KitAnchoring.RightCenter,
-                Origin = KitAnchoring.LeftCenter,
-                Location = new Vector2(2)
-            };
-
             KitText compileWindow = new KitText("", "Comic Sans MS Bold")
             {
                 Anchor = KitAnchoring.TopRight,
@@ -89,27 +82,11 @@ namespace Kit
                 TextColor = Colors.Red
             };
 
-            button.Released += () =>
-            {
-                string ret = "";
-                try
-                {
-                    object rv = CSCodeCompiler.ExecuteCode(area.TextField.Text, "mom", "dad", "start", true, null);
-                    if(rv is string)
-                    {
-                        ret = rv as string;
-                    }
-                }
-                catch(Core.Exceptions.CompilerErrorException e)
-                {
-                    compileWindow.Text = e.Message;
-                    return;
-                }
-                compileWindow.Text = ret;
-            };
+            KitScrollbar ksb = new KitScrollbar(area);
+
+            area.SetScrollbar(ksb);
 
             TopLevelComponent.AddChild(area);
-            area.AddChild(button);
             area.AddChild(compileWindow);
         }
 

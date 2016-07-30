@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kit.Graphics.Types;
 using Kit.Core;
 using Kit.Graphics.Drawing;
+using System.Windows.Input;
 
 namespace Kit.Graphics.Components
 {
@@ -13,6 +14,7 @@ namespace Kit.Graphics.Components
     {
         private KitScrollbar scrollbar;
         private MultilineIOFormatter mlFormatter;
+        private double textHeight;
 
         public KitTextArea(string font, double fontSize, Vector2 size, Vector2 location = default(Vector2))
             : base(font, fontSize, size.X, location)
@@ -22,15 +24,24 @@ namespace Kit.Graphics.Components
             TextField.Origin = KitAnchoring.TopLeft;
             scrollbar = null;
             formatter = mlFormatter = new MultilineIOFormatter(TextField);
+            textHeight = KitBrush.GetTextBounds("|", TextField.Font).Y;
         }
 
         public bool ContentLargerThanArea()
         {
+            if (TextField.Text.Length > 0 && TextField.Text.Last() == '\n')
+            {
+                return TextField.Size.Y + textHeight > Size.Y;
+            }
             return TextField.Size.Y > Size.Y;
         }
 
         public Vector2 ContentDimensions()
         {
+            if (TextField.Text.Length > 0 && TextField.Text.Last() == '\n')
+            {
+                return new Vector2(TextField.Size.X, TextField.Size.Y + textHeight);
+            }
             return TextField.Size;
         }
 
@@ -42,11 +53,27 @@ namespace Kit.Graphics.Components
         public void SetScrollbar(KitScrollbar scrollbar)
         {
             this.scrollbar = scrollbar;
+            scrollbar.RegisterScrollbar(this);
+            Size = new Vector2(Size.X - 16, Size.Y);
+            scrollbar.ScrollStep = textHeight;
+        }
+
+        private void trackCursor()
+        {
+            double Y = mlFormatter.GetCursorOffset().Y;
+            if (Y + textHeight > Size.Y + (scrollbar.ScrollStep * getScrollOffset()))
+            {
+                scrollbar.SetScrollLocation((Y - Size.Y + textHeight) / scrollbar.ScrollStep + (scrollbar.ScrollLocation / (TextField.Size.Y / scrollbar.ScrollStep)));
+            }
+            else if(Y < (scrollbar.ScrollStep * getScrollOffset()))
+            {
+                scrollbar.SetScrollLocation(Y / scrollbar.ScrollStep + (scrollbar.ScrollLocation / (TextField.Size.Y / scrollbar.ScrollStep)));
+            }
         }
 
         protected override void OnTextInput(string text)
-        {
-            if((Focused || TextField.Focused) && text.Length > 0 && text[0] == '\r')
+        { 
+            if ((Focused || TextField.Focused) && text.Length > 0 && text[0] == '\r')
             {
                 formatter.InsertText("\n");
                 forceRedrawCursor();
@@ -56,13 +83,36 @@ namespace Kit.Graphics.Components
                 formatter.InsertText("\t");
                 forceRedrawCursor();
             }
+
             base.OnTextInput(text);
+
+            if (scrollbar != null)
+            {
+                scrollbar.OnContentSizeChange();
+                if (scrollbar.Enabled)
+                {
+                    trackCursor();
+                }
+            }
+        }
+
+        protected override void OnKeyInput(Key key, KeyState state)
+        {
+            base.OnKeyInput(key, state);
+            if (scrollbar != null)
+            {
+                scrollbar.OnContentSizeChange();
+                if (scrollbar.Enabled && (key == Key.Up || key == Key.Down || key == Key.Left || key == Key.Right))
+                {
+                    trackCursor();
+                }
+            }
         }
 
         protected override void DrawCursor(KitBrush brush, Vector2 absLoc)
         {
             Vector2 lineStart = absLoc;
-            Vector2 lineEnd = new Vector2(lineStart.X, lineStart.Y + KitBrush.GetTextBounds("|", TextField.Font).Y);
+            Vector2 lineEnd = new Vector2(lineStart.X, lineStart.Y + textHeight);
 
             Vector2 pixelCursorOffset = mlFormatter.GetCursorOffset();
 
@@ -87,6 +137,8 @@ namespace Kit.Graphics.Components
             }
         }
 
+        private double getScrollOffset() { return (scrollbar.ScrollLocation - (scrollbar.ScrollLocation / (TextField.Size.Y / scrollbar.ScrollStep))); }
+
         protected override void SetContentLocation()
         {
             if (scrollbar == null)
@@ -95,7 +147,17 @@ namespace Kit.Graphics.Components
             }
             else
             {
-                //TODO
+                if (scrollbar.Enabled)
+                {
+                    double x = mlFormatter.GetVisibleOffset(Size.X, Size.Y, mlFormatter.CursorLoc).X;
+                    double y = -getScrollOffset() * scrollbar.ScrollStep;
+                    TextField.Location = new Vector2(x, y);
+                }
+                else
+                {
+                    double x = mlFormatter.GetVisibleOffset(Size.X, Size.Y, mlFormatter.CursorLoc).X;
+                    TextField.Location = new Vector2(x, 0);
+                }
             }
         }
     }

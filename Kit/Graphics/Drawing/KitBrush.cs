@@ -53,7 +53,7 @@ namespace Kit.Graphics.Drawing
             renderer.DrawLine(lineBrush, (Point)line.Point, (Point)line.Endpoint);
         }
 
-        public void DrawLine(Vector2 p1, Vector2 p2, Color color, float thickness)
+        public void DrawLine(Vector2 p1, Vector2 p2, Color color, float thickness, bool rounding = false)
         {
             if (renderer == null)
             {
@@ -66,8 +66,19 @@ namespace Kit.Graphics.Drawing
             }
 
             SetColor(color);
-
-            renderer.DrawLine(lineBrush, (Point)p1, (Point)p2);
+            if (rounding)
+            {
+                Point r1 = (Point)p1, r2 = (Point)p2;
+                r1.X = Math.Round(r1.X) + 0.5;
+                r1.Y = Math.Round(r1.Y) + 0.5;
+                r2.X = Math.Round(r2.X) + 0.5;
+                r2.Y = Math.Round(r2.Y) + 0.5;
+                renderer.DrawLine(lineBrush, r1, r2);
+            }
+            else
+            {
+                renderer.DrawLine(lineBrush, (Point)p1, (Point)p2);
+            }
         }
 
         public static Vector2 GetTextBounds(string text, KitFont font)
@@ -166,13 +177,20 @@ namespace Kit.Graphics.Drawing
             }
         }
 
-        public void PushClip(Vector2 pos, Vector2 size)
+        public void PushClip(Vector2 pos, Vector2 size, bool rounded = false, double rad = 0)
         {
             if (renderer == null)
             {
                 //THROW EXC
             }
-            renderer.PushClip(new RectangleGeometry(new Rect(pos.X, pos.Y, size.X, size.Y)));
+            if (rounded)
+            {
+                renderer.PushClip(new RectangleGeometry(new Rect(pos.X, pos.Y, size.X, size.Y), rad, rad));
+            }
+            else
+            {
+                renderer.PushClip(new RectangleGeometry(new Rect(pos.X, pos.Y, size.X, size.Y)));
+            }
         }
 
         public void Pop()

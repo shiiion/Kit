@@ -63,7 +63,7 @@ namespace Kit.Graphics.Components
                 Opacity = 0
             };
 
-            closeButton = new KitButton(@"D:\JPEG\XButton.png", @"D:\JPEG\XButtonDown.png", new Vector2(16, 16))
+            closeButton = new KitButton(@"D:\kit\XButton.png", @"D:\kit\XButtonDown.png", new Vector2(16, 16))
             {
                 Origin = KitAnchoring.RightCenter,
                 Anchor = KitAnchoring.RightCenter,
@@ -190,7 +190,6 @@ namespace Kit.Graphics.Components
 
         protected override void DrawComponent(KitBrush brush)
         {
-            //REFACTOR TO ANIMATION CLASS
             if (fadingAnimation.Animating)
             {
                 brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, BarColor, 5, 5);

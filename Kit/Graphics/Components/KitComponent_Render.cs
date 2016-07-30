@@ -11,7 +11,20 @@ namespace Kit.Graphics.Components
     {
         public event VoidDelegate Draw;
 
-        public double ComponentDepth { get; set; }
+        private double componentDepth;
+        public double ComponentDepth
+        {
+            get
+            {
+                return componentDepth;
+            }
+
+            set
+            {
+                componentDepth = value;
+                DepthChanged?.Invoke();
+            }
+        }
 
         public bool ShouldDraw { get; set; }
 
@@ -51,6 +64,14 @@ namespace Kit.Graphics.Components
                 redraw = value;
             }
         }
+
+        public event VoidDelegate DepthChanged;
+
+        public bool UseCustomMask { get; set; }
+        public Vector2 CustomMask { get; set; }
+
+        public bool RoundedMask { get; set; }
+        public double RoundingRadius { get; set; }
 
         protected virtual void OnDraw()
         {
@@ -201,7 +222,14 @@ namespace Kit.Graphics.Components
             if (Masked)
             {
                 Vector2 loc = GetAbsoluteLocation();
-                brush.PushClip(loc, Size);
+                if (UseCustomMask)
+                {
+                    brush.PushClip(loc, CustomMask, RoundedMask, RoundingRadius);
+                }
+                else
+                {
+                    brush.PushClip(loc, Size, RoundedMask, RoundingRadius);
+                }
                 if (parent != null)
                 {
                     parent.pushNecessaryClips(brush);

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Kit.Graphics.Types;
+using Kit.Graphics.Components;
 
 namespace Kit.Graphics.Components
 {

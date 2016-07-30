@@ -29,6 +29,7 @@ namespace Kit.Graphics.Components
                 Origin = KitAnchoring.LeftCenter,
                 TextColor = Colors.Black,
                 ShouldDraw = false,
+                ComponentDepth = double.MinValue,
                 Size = Size,
                 Masked = true
             };
@@ -39,8 +40,10 @@ namespace Kit.Graphics.Components
             Vector2 TextMetrics = KitBrush.GetTextBounds("|", TextField.Font);
             Size = new Vector2(maxWidth, TextMetrics.Y + 4);
             lastFlashTime = time;
-            BackColor = Color.FromArgb(0x7f, 0xff, 0, 0);
+            BackColor = Color.FromArgb(0x7f, 0xff, 0xff, 0xff);
             HighlightColor = Color.FromArgb(0x7f, 0, 0, 0xff);
+            RoundedMask = true;
+            RoundingRadius = 5;
         }
 
         public override void PreDrawComponent(KitBrush brush)
@@ -178,7 +181,7 @@ namespace Kit.Graphics.Components
         {
             Vector2 absLoc = GetAbsoluteLocation();
 
-            brush.DrawRoundedRectangle(new Box(new Vector2(absLoc.X - 2, absLoc.Y), new Vector2(Size.X + 4, Size.Y)), true, BackColor, 5, 5);
+            brush.DrawRoundedRectangle(new Box(new Vector2(absLoc.X, absLoc.Y), new Vector2(Size.X, Size.Y)), true, BackColor, 5, 5);
 
             SetContentLocation();
 

@@ -11,8 +11,10 @@ namespace Kit
     public partial class App : Application
     {
         public static List<KitWindow> WindowList { get; set; }
+        public static List<KitWindow> RemoveList { get; set; }
 
         public static object WindowListLock = new object();
+        public static object RemoveLock = new object();
 
         private static void updateThread()
         {
@@ -25,6 +27,15 @@ namespace Kit
                         window.UpdateComponents();
                     }
                 }
+
+                lock(RemoveLock)
+                {
+                    foreach (KitWindow window in RemoveList)
+                    {
+                        WindowList.Remove(window);
+                    }
+                    RemoveList.Clear();
+                }
                 Thread.Sleep(16);
             }
         }
@@ -34,6 +45,7 @@ namespace Kit
         {
             Core.GlobalTimer.StartTimer();
             WindowList = new List<KitWindow>();
+            RemoveList = new List<KitWindow>();
             App kitApp = new App();
             KitWindow startWindow = new KitWindow();
             startWindow.Width = 700;
