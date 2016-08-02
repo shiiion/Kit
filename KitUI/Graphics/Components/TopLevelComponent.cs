@@ -12,16 +12,22 @@ namespace Kit.Graphics.Components
     {
         private List<KitComponent> drawOrder;
 
-        private KitTitleBar titleBar;
+        public KitTitleBar TitleBar
+        {
+            get; set;
+        }
 
         public Vector2 WindowLocation { get; set; }
 
-        public TopLevelComponent(KitWindow owner, string title, VoidDelegate onClose)
-            : base(Vector2.Zero, new Vector2(owner.Width, owner.Height))
+        public bool OpacityMode { get; set; }
+
+        public TopLevelComponent(Vector2 windowDims, string title, VoidDelegate onClose, string xButtonRes, string xButtonReleaseRes)
+            : base(Vector2.Zero, new Vector2(windowDims.X, windowDims.Y))
         {
             drawOrder = new List<KitComponent>();
-            titleBar = new KitTitleBar(System.Windows.Media.Color.FromArgb(220, 127, 127, 127), this, onClose, title);
-            AddChild(titleBar);
+            TitleBar = new KitTitleBar(System.Windows.Media.Color.FromArgb(220, 127, 127, 127), this, onClose, xButtonRes, xButtonReleaseRes, title);
+            AddChild(TitleBar);
+            OpacityMode = true;
         }
 
         private void orderByDepth(List<KitComponent> list)
@@ -121,22 +127,39 @@ namespace Kit.Graphics.Components
             {
                 if (component.ShouldDraw)
                 {
-                    brush.PushOpacity(component.Opacity);
+                    if (OpacityMode)
+                    {
+                        brush.PushOpacity(component.Opacity);
+                    }
                     component._DrawComponent(brush);
-                    brush.Pop();
+                    if (OpacityMode)
+                    {
+                        brush.Pop();
+                    }
                 }
             }
             redraw = false;
 
-            brush.PushOpacity(titleBar.Opacity);
-            titleBar._DrawComponent(brush);
-            brush.Pop();
-
-            foreach (KitComponent component in titleBar.Children)
+            if (OpacityMode)
             {
-                brush.PushOpacity(component.Opacity);
-                component._DrawComponent(brush);
+                brush.PushOpacity(TitleBar.Opacity);
+            }
+            TitleBar._DrawComponent(brush);
+            if (OpacityMode)
+            {
                 brush.Pop();
+            }
+            foreach (KitComponent component in TitleBar.Children)
+            {
+                if (OpacityMode)
+                {
+                    brush.PushOpacity(component.Opacity);
+                }
+                component._DrawComponent(brush);
+                if (OpacityMode)
+                {
+                    brush.Pop();
+                }
             }
 
 #if DEBUG

@@ -66,35 +66,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\CSCodeCompiler.cs" />
-    <Compile Include="Core\Delegates\BaseDelegates.cs" />
-    <Compile Include="Core\Exceptions\CompilerErrorException.cs" />
-    <Compile Include="Core\Exceptions\TimerStoppedException.cs" />
-    <Compile Include="Core\GlobalTimer.cs" />
-    <Compile Include="Core\InputData.cs" />
-    <Compile Include="Core\MultilineIOFormatter.cs" />
-    <Compile Include="Core\TextIOFormatter.cs" />
-    <Compile Include="Graphics\Components\IContainer.cs" />
-    <Compile Include="Graphics\Components\IScrollable.cs" />
-    <Compile Include="Graphics\Components\KitBox.cs" />
-    <Compile Include="Graphics\Components\KitButton.cs" />
-    <Compile Include="Graphics\Components\KitComponent.cs" />
-    <Compile Include="Graphics\Components\KitComponent_Render.cs" />
-    <Compile Include="Graphics\Components\KitImage.cs" />
-    <Compile Include="Graphics\Components\KitScrollbar.cs" />
-    <Compile Include="Graphics\Components\KitText.cs" />
-    <Compile Include="Graphics\Components\KitTextAnimation.cs" />
-    <Compile Include="Graphics\Components\KitTextArea.cs" />
-    <Compile Include="Graphics\Components\KitTextBox.cs" />
-    <Compile Include="Graphics\Components\KitTitleBar.cs" />
-    <Compile Include="Graphics\Components\KitRevealText.cs" />
-    <Compile Include="Graphics\Components\TopLevelComponent.cs" />
-    <Compile Include="Graphics\Drawing\AnimationControl.cs" />
-    <Compile Include="Graphics\Drawing\KitBrush.cs" />
-    <Compile Include="Graphics\Drawing\KitFont.cs" />
-    <Compile Include="Graphics\Types\Box.cs" />
-    <Compile Include="Graphics\Types\Line.cs" />
-    <Compile Include="Graphics\Types\Vector2.cs" />
     <Compile Include="KitWindow.xaml.cs">
       <DependentUpon>KitWindow.xaml</DependentUpon>
     </Compile>
@@ -133,10 +104,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\XButton.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\XButtonDown.png" />
   </ItemGroup>
+  <Import Project="..\KitUI\KitUI.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -5,7 +5,16 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kit", "Kit\Kit.csproj", "{C3B07DE2-BDA8-4A32-9138-DB12D2616987}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KitCreator", "KitCreator\KitCreator.csproj", "{29C422EC-68CC-4F78-AD25-076BD7D6021C}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "KitUI", "KitUI\KitUI.shproj", "{5850B035-8E15-45BE-ACCE-25719F135F8D}"
+EndProject
 Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		KitUI\KitUI.projitems*{c3b07de2-bda8-4a32-9138-db12d2616987}*SharedItemsImports = 4
+		KitUI\KitUI.projitems*{5850b035-8e15-45be-acce-25719f135f8d}*SharedItemsImports = 13
+		KitUI\KitUI.projitems*{29c422ec-68cc-4f78-ad25-076bd7d6021c}*SharedItemsImports = 4
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|x64 = Debug|x64
@@ -27,6 +36,18 @@ Global
 		{C3B07DE2-BDA8-4A32-9138-DB12D2616987}.Release|x64.Build.0 = Release|Any CPU
 		{C3B07DE2-BDA8-4A32-9138-DB12D2616987}.Release|x86.ActiveCfg = Release|Any CPU
 		{C3B07DE2-BDA8-4A32-9138-DB12D2616987}.Release|x86.Build.0 = Release|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Debug|x64.Build.0 = Debug|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Debug|x86.Build.0 = Debug|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Release|x64.ActiveCfg = Release|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Release|x64.Build.0 = Release|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Release|x86.ActiveCfg = Release|Any CPU
+		{29C422EC-68CC-4F78-AD25-076BD7D6021C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -32,14 +32,14 @@ namespace Kit
 
             lastMouseLoc = new Vector2(-1, -1);
 
-            TopLevelComponent = new TopLevelComponent(this, title, () =>
+            TopLevelComponent = new TopLevelComponent(new Vector2(Width, Height), title, () =>
             {
                 lock(App.RemoveLock)
                 {
                     App.RemoveList.Add(this);
                     Close();
                 }
-            });
+            }, @"pack://application:,,,/Resources/XButton.png", @"pack://application:,,,/Resources/XButtonDown.png");
             componentBrush = new KitBrush();
             SizeChanged += (o, e) =>
             {
@@ -65,39 +65,6 @@ namespace Kit
             LocationChanged += (o, e) =>
             {
                 windowLoc = new Vector2(Left, Top);
-            };
-
-            KitTextArea kta = new KitTextArea("Consolas", 16, new Vector2(300, 300), new Vector2(0, 22))
-            {
-
-            };
-            TopLevelComponent.AddChild(kta);
-
-            KitScrollbar ksb = new KitScrollbar(kta);
-
-            kta.SetScrollbar(ksb);
-
-            KitRevealText krt = new KitRevealText(30, "", "Consolas", 10)
-            {
-                Anchor = KitAnchoring.TopRight,
-                Origin = KitAnchoring.TopLeft,
-                TextColor = Colors.Yellow
-            };
-
-            kta.AddChild(krt);
-
-            KitButton but = new KitButton("show me the text", "Comic Sans MS Bold", 32, Colors.Red, Colors.DarkGray, Colors.LightGray, new Vector2(5, 5), 3)
-            {
-                Anchor = KitAnchoring.BottomRight,
-                Origin = KitAnchoring.BottomLeft,
-            };
-
-            kta.AddChild(but);
-
-            but.Released += () =>
-            {
-                krt.Text = kta.TextField.Text;
-                krt.StartAnimation();
             };
         }
 

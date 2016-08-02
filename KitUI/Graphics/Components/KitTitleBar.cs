@@ -8,7 +8,7 @@ using Kit.Core.Delegates;
 
 namespace Kit.Graphics.Components
 {
-    class KitTitleBar : KitComponent
+    public class KitTitleBar : KitComponent
     {
         public Color BarColor { get; set; }
 
@@ -31,7 +31,7 @@ namespace Kit.Graphics.Components
         private KitButton closeButton;
         private AnimationControl fadingAnimation;
 
-        public KitTitleBar(Color barColor, TopLevelComponent topParent, VoidDelegate onClose, string title = "", Vector2 location = default(Vector2))
+        public KitTitleBar(Color barColor, TopLevelComponent topParent, VoidDelegate onClose, string pressRes, string releasedRes, string title = "", Vector2 location = default(Vector2))
             : base(location)
         {
             ComponentDepth = double.MaxValue;
@@ -63,17 +63,29 @@ namespace Kit.Graphics.Components
                 Opacity = 0
             };
 
-            
 
-            closeButton = new KitButton(@"pack://application:,,,/Resources/XButton.png", @"pack://application:,,,/Resources/XButtonDown.png", new Vector2(16, 16))
+            if (string.IsNullOrWhiteSpace(pressRes))
             {
-                Origin = KitAnchoring.RightCenter,
-                Anchor = KitAnchoring.RightCenter,
-                Location = new Vector2(-2, 0),
-                ComponentDepth = double.MaxValue,
-                Opacity = 0
-            };
-
+                closeButton = new KitButton("X", "Consolas", 12, Colors.Black, Colors.LightGray, Colors.White, new Vector2(2, 2), 2)
+                {
+                    Origin = KitAnchoring.RightCenter,
+                    Anchor = KitAnchoring.RightCenter,
+                    Location = new Vector2(-4, 0),
+                    ComponentDepth = double.MaxValue,
+                    Opacity = 0
+                };
+            }
+            else
+            {
+                closeButton = new KitButton(pressRes, releasedRes, new Vector2(16, 16))
+                {
+                    Origin = KitAnchoring.RightCenter,
+                    Anchor = KitAnchoring.RightCenter,
+                    Location = new Vector2(-4, 0),
+                    ComponentDepth = double.MaxValue,
+                    Opacity = 0
+                };
+            }
             closeButton.Released += onClose;
 
             AddChild(titleComponent);
@@ -196,6 +208,10 @@ namespace Kit.Graphics.Components
             {
                 brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, BarColor, 5, 5);
                 return;
+            }
+            else if(Opacity >= 1)
+            {
+                brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, BarColor, 5, 5);
             }
             base.DrawComponent(brush);
         }
