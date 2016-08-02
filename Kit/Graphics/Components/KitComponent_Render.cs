@@ -26,7 +26,23 @@ namespace Kit.Graphics.Components
             }
         }
 
-        public bool ShouldDraw { get; set; }
+        private bool shouldDraw;
+        public bool ShouldDraw
+        {
+            get
+            {
+                return shouldDraw;
+            }
+
+            set
+            {
+                if(!value)
+                {
+                    Redraw = false;
+                }
+                shouldDraw = value;
+            }
+        }
 
         public double Opacity { get; set; }
 
@@ -50,7 +66,7 @@ namespace Kit.Graphics.Components
                 ret = redraw;
                 foreach (KitComponent child in Children)
                 {
-                    ret |= child.Redraw;
+                    ret |= (child.Redraw);
                     if (ret)
                     {
                         break;
@@ -88,7 +104,7 @@ namespace Kit.Graphics.Components
                 bool beforeEnd = false;
                 for (int i = 0; i < outList.Count; i++)
                 {
-                    if (outList[i].ComponentDepth >= ComponentDepth)
+                    if (outList[i].ComponentDepth > ComponentDepth)
                     {
                         outList.Insert(i, this);
                         beforeEnd = true;

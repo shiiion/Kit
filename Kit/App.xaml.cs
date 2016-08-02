@@ -47,10 +47,11 @@ namespace Kit
             WindowList = new List<KitWindow>();
             RemoveList = new List<KitWindow>();
             App kitApp = new App();
-            KitWindow startWindow = new KitWindow();
+            KitWindow startWindow = new KitWindow("Test Window");
             startWindow.Width = 700;
             startWindow.Height = 324;
             WindowList.Add(startWindow);
+            startWindow.ClickableBackground = true;
             startWindow.Show();
 
             Thread kitUpdateThread = new Thread(updateThread);

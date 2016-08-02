@@ -4,6 +4,7 @@ using Kit.Graphics.Types;
 using Kit.Graphics.Drawing;
 using Kit.Core;
 using Kit.Core.Delegates;
+using System;
 
 namespace Kit.Graphics.Components
 {
@@ -110,9 +111,12 @@ namespace Kit.Graphics.Components
             }
         }
 
-        public void DrawComponentTree(KitBrush brush)
+        public void DrawComponentTree(KitBrush brush, bool drawBG)
         {
-            brush.DrawRectangle(new Box(0, 0, Size), true, System.Windows.Media.Color.FromArgb(0x01, 0x7f, 0x7f, 0x7f));
+            if (drawBG)
+            {
+                brush.DrawRectangle(new Box(0, 0, Size), true, System.Windows.Media.Color.FromArgb(0x01, 0x7f, 0x7f, 0x7f));
+            }
             foreach (KitComponent component in drawOrder)
             {
                 if (component.ShouldDraw)

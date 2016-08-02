@@ -4,6 +4,7 @@ using Kit.Core;
 using Kit.Graphics.Drawing;
 using System.Windows.Media;
 using Kit.Graphics.Types;
+using Kit.Core.Delegates;
 
 namespace Kit.Graphics.Components
 {
@@ -18,7 +19,11 @@ namespace Kit.Graphics.Components
 
         public Color HighlightColor { get; set; }
 
+        protected Vector2 boxSize;
+
         protected TextIOFormatter formatter;
+
+        public event StringDelegate TextChanged;
 
         public KitTextBox(string font, double fontSize, double maxWidth, Vector2 location = default(Vector2))
             : base(location)
@@ -39,11 +44,14 @@ namespace Kit.Graphics.Components
             Masked = true;
             Vector2 TextMetrics = KitBrush.GetTextBounds("|", TextField.Font);
             Size = new Vector2(maxWidth, TextMetrics.Y + 4);
+            boxSize = Size;
             lastFlashTime = time;
             BackColor = Color.FromArgb(0x7f, 0xff, 0xff, 0xff);
             HighlightColor = Color.FromArgb(0x7f, 0, 0, 0xff);
             RoundedMask = true;
             RoundingRadius = 5;
+
+            Resize += handleBoxSizeChanged;
         }
 
         public override void PreDrawComponent(KitBrush brush)
@@ -94,6 +102,7 @@ namespace Kit.Graphics.Components
             {
                 formatter.InsertText(text);
                 forceRedrawCursor();
+                TextChanged?.Invoke(TextField.Text);
             }
             base.OnTextInput(text);
         }
@@ -108,6 +117,10 @@ namespace Kit.Graphics.Components
                     if (formatter.HandleKeyPress(key))
                     {
                         forceRedrawCursor();
+                    }
+                    if(key == Key.Delete || key == Key.Back)
+                    {
+                        TextChanged?.Invoke(TextField.Text);
                     }
                 }
             }
@@ -150,7 +163,7 @@ namespace Kit.Graphics.Components
         protected virtual void DrawCursor(KitBrush brush, Vector2 absLoc)
         {
             Vector2 lineStart = absLoc;
-            Vector2 lineEnd = new Vector2(lineStart.X, lineStart.Y + Size.Y);
+            Vector2 lineEnd = new Vector2(lineStart.X, lineStart.Y + boxSize.Y);
 
             double pixelCursorOffset = formatter.GetCursorOffset();
 
@@ -174,14 +187,14 @@ namespace Kit.Graphics.Components
 
         protected virtual void SetContentLocation()
         {
-            TextField.Location = formatter.GetVisibleOffset(TextField.Text, Size.X, formatter.CursorLoc);
+            TextField.Location = formatter.GetVisibleOffset(TextField.Text, boxSize.X, formatter.CursorLoc);
         }
 
         protected override void DrawComponent(KitBrush brush)
         {
             Vector2 absLoc = GetAbsoluteLocation();
 
-            brush.DrawRoundedRectangle(new Box(new Vector2(absLoc.X, absLoc.Y), new Vector2(Size.X, Size.Y)), true, BackColor, 5, 5);
+            brush.DrawRoundedRectangle(new Box(absLoc, boxSize), true, BackColor, 5, 5);
 
             SetContentLocation();
 
@@ -201,6 +214,11 @@ namespace Kit.Graphics.Components
 
             TextField._DrawComponent(brush);
             base.DrawComponent(brush);
+        }
+
+        protected void handleBoxSizeChanged()
+        {
+            boxSize = Size;
         }
     }
 }

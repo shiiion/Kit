@@ -18,6 +18,7 @@ namespace Kit
     public partial class KitWindow : Window
     {
         public TopLevelComponent TopLevelComponent { get; set; }
+        public bool ClickableBackground { get; set; }
         private KitBrush componentBrush;
         private object windowLock = new object();
 
@@ -25,13 +26,13 @@ namespace Kit
 
         private Vector2 windowLoc;
 
-        public KitWindow()
+        public KitWindow(string title)
         {
             InitializeComponent();
 
             lastMouseLoc = new Vector2(-1, -1);
 
-            TopLevelComponent = new TopLevelComponent(this, "Kit", () =>
+            TopLevelComponent = new TopLevelComponent(this, title, () =>
             {
                 lock(App.RemoveLock)
                 {
@@ -50,10 +51,7 @@ namespace Kit
             {
                 if (TopLevelComponent.Redraw)
                 {
-                    lock (windowLock)
-                    {
-                        InvalidateVisual();
-                    }
+                    InvalidateVisual();
                 }
             };
 
@@ -69,30 +67,46 @@ namespace Kit
                 windowLoc = new Vector2(Left, Top);
             };
 
-            KitTextArea area = new KitTextArea("Consolas", 32, new Vector2(340, 300))
+            KitTextArea kta = new KitTextArea("Consolas", 16, new Vector2(300, 300), new Vector2(0, 22))
             {
-                Location = new Vector2(0, 22)
-            };
 
-            KitText compileWindow = new KitText("", "Comic Sans MS Bold")
+            };
+            TopLevelComponent.AddChild(kta);
+
+            KitScrollbar ksb = new KitScrollbar(kta);
+
+            kta.SetScrollbar(ksb);
+
+            KitRevealText krt = new KitRevealText(30, "", "Consolas", 10)
             {
                 Anchor = KitAnchoring.TopRight,
                 Origin = KitAnchoring.TopLeft,
-                Location = new Vector2(50 + 2 + 10),
-                TextColor = Colors.Red
+                TextColor = Colors.Yellow
             };
 
-            KitScrollbar ksb = new KitScrollbar(area);
+            kta.AddChild(krt);
 
-            area.SetScrollbar(ksb);
+            KitButton but = new KitButton("show me the text", "Comic Sans MS Bold", 32, Colors.Red, Colors.DarkGray, Colors.LightGray, new Vector2(5, 5), 3)
+            {
+                Anchor = KitAnchoring.BottomRight,
+                Origin = KitAnchoring.BottomLeft,
+            };
 
-            TopLevelComponent.AddChild(area);
-            area.AddChild(compileWindow);
+            kta.AddChild(but);
+
+            but.Released += () =>
+            {
+                krt.Text = kta.TextField.Text;
+                krt.StartAnimation();
+            };
         }
 
         protected override void OnRender(DrawingContext drawingContext)
         {
-            BeginPaint(drawingContext);
+            lock (windowLock)
+            {
+                BeginPaint(drawingContext);
+            }
             base.OnRender(drawingContext);
         }
 
@@ -101,7 +115,7 @@ namespace Kit
             componentBrush.InitRender(context);
             TopLevelComponent.PreDrawComponentTree(componentBrush);
 
-            TopLevelComponent.DrawComponentTree(componentBrush);
+            TopLevelComponent.DrawComponentTree(componentBrush, ClickableBackground);
         }
 
         public void UpdateComponents()

@@ -26,9 +26,13 @@ namespace Kit.Graphics.Components
 
         public Color TextColor { get; set; }
 
+        public bool BackgroundEnabled { get; set; }
+        public KitBox TextBackground { get; set; }
+
         public KitText(string text = "", string font = "Consolas", double ptSize = 12)
             : base()
         {
+            BackgroundEnabled = false;
             Font = new KitFont()
             {
                 FontSize = ptSize
@@ -36,6 +40,11 @@ namespace Kit.Graphics.Components
             LoadFont(font, FontStyles.Normal, FontWeights.Normal);
             Text = text;
             TextColor = Colors.Black;
+            TextBackground = new KitBox(Colors.LightGray, Size)
+            {
+                ShouldDraw = false
+            };
+            AddChild(TextBackground);
         }
 
         public void LoadFont(string font, FontStyle style, FontWeight weight)
@@ -60,6 +69,10 @@ namespace Kit.Graphics.Components
 
         protected override void DrawComponent(KitBrush brush)
         {
+            if (BackgroundEnabled)
+            {
+                TextBackground._DrawComponent(brush);
+            }
             Vector2 pos = GetAbsoluteLocation();
             pushNecessaryClips(brush);
             brush.DrawString(Text, Font, pos, TextColor);

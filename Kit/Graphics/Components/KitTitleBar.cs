@@ -197,7 +197,7 @@ namespace Kit.Graphics.Components
                 brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, BarColor, 5, 5);
                 return;
             }
-            Redraw = false;
+            base.DrawComponent(brush);
         }
     }
 }

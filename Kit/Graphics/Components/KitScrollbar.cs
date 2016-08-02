@@ -32,7 +32,7 @@ namespace Kit.Graphics.Components
             ScrollAmount = 1;
             ScrollStep = 1;
             Anchor = KitAnchoring.TopRight;
-            Origin = KitAnchoring.TopLeft;
+            Origin = KitAnchoring.TopRight;
 
             scrollBar = new KitBox(Color.FromArgb(0xE0, 0xD3, 0xD3, 0xD3), new Vector2(16, parent.Size.Y))
             {
@@ -154,7 +154,7 @@ namespace Kit.Graphics.Components
             }
             else
             {
-                scrollBar.BoxColor = Color.FromArgb(0x5F, 0xD3, 0xD3, 0xD3);
+                scrollBar.BoxColor = Color.FromArgb(0xE0, 0x43, 0x43, 0x43);
             }
             base.PreDrawComponent(brush);
         }
@@ -163,7 +163,7 @@ namespace Kit.Graphics.Components
         {
             Vector2 lineStart = scrollBar.GetAbsoluteLocation();
             lineStart.AddThis(scrollBar.Size * 0.5);
-            Color splitColor = Color.FromArgb(0xFF, 0x40, 0x40, 0x40);
+            Color splitColor = Color.FromArgb(0xFF, 0xFF, 0xFF, 0xFF);
             brush.DrawLine(new Vector2(lineStart.X - 4, lineStart.Y), new Vector2(lineStart.X + 4, lineStart.Y), splitColor, 1, true);
             brush.DrawLine(new Vector2(lineStart.X - 2, lineStart.Y + 2), new Vector2(lineStart.X + 2, lineStart.Y + 2), splitColor, 1, true);
             brush.DrawLine(new Vector2(lineStart.X - 2, lineStart.Y - 2), new Vector2(lineStart.X + 2, lineStart.Y - 2), splitColor, 1, true);

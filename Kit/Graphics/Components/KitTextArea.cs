@@ -25,6 +25,19 @@ namespace Kit.Graphics.Components
             scrollbar = null;
             formatter = mlFormatter = new MultilineIOFormatter(TextField);
             textHeight = KitBrush.GetTextBounds("|", TextField.Font).Y;
+
+            Resize -= handleBoxSizeChanged;
+            Resize += () =>
+            {
+                if(scrollbar != null)
+                {
+                    boxSize = new Vector2(Size.X - scrollbar.Size.X, Size.Y);
+                }
+                else
+                {
+                    handleBoxSizeChanged();
+                }
+            };
         }
 
         public bool ContentLargerThanArea()
@@ -49,16 +62,16 @@ namespace Kit.Graphics.Components
         {
             this.scrollbar = scrollbar;
             scrollbar.RegisterScrollbar(this);
-            Size = new Vector2(Size.X - 16, Size.Y);
+            boxSize = new Vector2(Size.X - scrollbar.Size.X, Size.Y);
             scrollbar.ScrollStep = textHeight;
         }
 
         private void trackCursor()
         {
             double Y = mlFormatter.GetCursorOffset().Y;
-            if (Y + textHeight > Size.Y + (scrollbar.ScrollStep * getScrollOffset()))
+            if (Y + textHeight > boxSize.Y + (scrollbar.ScrollStep * getScrollOffset()))
             {
-                scrollbar.SetScrollLocation((Y - Size.Y + textHeight) / scrollbar.ScrollStep + (scrollbar.ScrollLocation / (TextField.Size.Y / scrollbar.ScrollStep)));
+                scrollbar.SetScrollLocation((Y - boxSize.Y + textHeight) / scrollbar.ScrollStep + (scrollbar.ScrollLocation / (TextField.Size.Y / scrollbar.ScrollStep)));
             }
             else if(Y < (scrollbar.ScrollStep * getScrollOffset()))
             {
@@ -146,19 +159,19 @@ namespace Kit.Graphics.Components
         {
             if (scrollbar == null)
             {
-                TextField.Location = mlFormatter.GetVisibleOffset(Size.X, Size.Y, mlFormatter.CursorLoc);
+                TextField.Location = mlFormatter.GetVisibleOffset(boxSize.X, boxSize.Y, mlFormatter.CursorLoc);
             }
             else
             {
                 if (scrollbar.Enabled)
                 {
-                    double x = mlFormatter.GetVisibleOffset(Size.X, Size.Y, mlFormatter.CursorLoc).X;
+                    double x = mlFormatter.GetVisibleOffset(boxSize.X, boxSize.Y, mlFormatter.CursorLoc).X;
                     double y = -getScrollOffset() * scrollbar.ScrollStep;
                     TextField.Location = new Vector2(x, y);
                 }
                 else
                 {
-                    double x = mlFormatter.GetVisibleOffset(Size.X, Size.Y, mlFormatter.CursorLoc).X;
+                    double x = mlFormatter.GetVisibleOffset(boxSize.X, boxSize.Y, mlFormatter.CursorLoc).X;
                     TextField.Location = new Vector2(x, 0);
                 }
             }

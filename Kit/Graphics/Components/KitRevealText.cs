@@ -99,7 +99,6 @@ namespace Kit.Graphics.Components
 
         protected override void DrawComponent(KitBrush brush)
         {
-            Console.Write("ad+");
             if(Running)
             {
                 Vector2 pos = GetAbsoluteLocation();

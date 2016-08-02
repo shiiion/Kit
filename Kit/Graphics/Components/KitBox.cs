@@ -5,7 +5,7 @@ using Kit.Graphics.Types;
 
 namespace Kit.Graphics.Components
 {
-    class KitBox : KitComponent
+    public class KitBox : KitComponent
     {
         public Color BoxColor { get; set; }
 
