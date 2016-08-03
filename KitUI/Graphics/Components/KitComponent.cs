@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using Kit.Graphics.Types;
 using Kit.Core.Delegates;
-using System.Runtime.InteropServices;
+using Kit.Graphics.Drawing;
+using System.Timers;
 using Kit.Core;
 using System.Windows.Input;
 
@@ -78,6 +79,14 @@ namespace Kit.Graphics.Components
 
             RoundedMask = false;
             RoundingRadius = 0;
+
+            FadeControl = new AnimationControl(-1, 1);
+            MovementControl = new AnimationControl(-1, 1);
+            fadeTimer = new Timer();
+            moveTimer = new Timer();
+
+            fadeTimer.Elapsed += (sender, e) => onFadeElapsed();
+            moveTimer.Elapsed += (sender, e) => onMoveElapsed();
         }
 
         public void SetParent(KitComponent parent)
@@ -144,6 +153,18 @@ namespace Kit.Graphics.Components
 
         protected virtual void OnUpdate()
         {
+            bool draw = false;
+            if (!FadeControl.AnimationOver() && FadeControl.Animating)
+            {
+                FadeControl.StepAnimation(time);
+                draw = true;
+            }
+            if (!MovementControl.AnimationOver() && MovementControl.Animating)
+            {
+                MovementControl.StepAnimation(time);
+                draw = true;
+            }
+            Redraw |= draw;
         }
 
         public void UpdateSubcomponents(double CurTime)

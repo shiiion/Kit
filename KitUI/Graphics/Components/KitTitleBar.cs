@@ -135,8 +135,10 @@ namespace Kit.Graphics.Components
             Vector2 cursorLoc = GetCursorPosition() - topParent.WindowLocation;
             if (topParent.Contains(cursorLoc))
             {
-                if (!fadingAnimation.Animating || fadingAnimation.AnimationTag.Equals("fadeout"))
+                if (!fadingAnimation.Animating || fadingAnimation.AnimationTag.Equals("fadeout") ||
+                    (fadingAnimation.AnimationTag.Equals("fadeouthover") && (time - hoverTime < 3000)))
                 {
+                    fadingAnimation.Inverted = false;
                     hoverTime = time;
                     hover = cursorLoc;
                     fadingAnimation.BeginAnimation(time, "fadein");
@@ -147,17 +149,15 @@ namespace Kit.Graphics.Components
                 }
                 if (time - hoverTime >= 3000 && !fadingAnimation.AnimationTag.Equals("fadeouthover"))
                 {
+                    fadingAnimation.Inverted = true;
                     fadingAnimation.BeginAnimation(time, "fadeouthover");
-                }
-                if (fadingAnimation.AnimationTag.Equals("fadeouthover") && (time - hoverTime < 3000))
-                {
-                    fadingAnimation.BeginAnimation(time, "fadeinhover");
                 }
             }
             else
             {
-                if (fadingAnimation.AnimationTag.Contains("fadein"))
+                if (fadingAnimation.AnimationTag.Equals("fadein") || fadingAnimation.AnimationTag.Equals("fadeouthover"))
                 {
+                    fadingAnimation.Inverted = true;
                     fadingAnimation.BeginAnimation(time, "fadeout");
                 }
             }
@@ -165,7 +165,7 @@ namespace Kit.Graphics.Components
 
             if (!fadingAnimation.AnimationOver() && fadingAnimation.Animating)
             {
-                redraw = true;
+                Redraw = true;
             }
             hover = cursorLoc;
             base.OnUpdate();
@@ -189,14 +189,7 @@ namespace Kit.Graphics.Components
             {
                 Redraw = false;
             }
-            if (fadingAnimation.AnimationTag.Contains("fadein"))
-            {
-                Opacity = fadingAnimation.GetGradient();
-            }
-            else if (fadingAnimation.AnimationTag.Contains("fadeout"))
-            {
-                Opacity = 1 - fadingAnimation.GetGradient();
-            }
+            Opacity = fadingAnimation.GetGradient();
             titleComponent.Opacity = Opacity;
             closeButton.Opacity = Opacity;
             base.PreDrawComponent(brush);

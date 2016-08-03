@@ -3,6 +3,8 @@ using Kit.Core.Delegates;
 using Kit.Graphics.Drawing;
 using Kit.Graphics.Types;
 using System.Collections.Generic;
+using System.Timers;
+using Kit.Core;
 
 namespace Kit.Graphics.Components
 {
@@ -89,6 +91,15 @@ namespace Kit.Graphics.Components
         public bool RoundedMask { get; set; }
         public double RoundingRadius { get; set; }
 
+        private AnimationControl FadeControl { get; set; }
+        private AnimationControl MovementControl { get; set; }
+
+        private Vector2 startPos;
+        private Vector2 endPos;
+
+        private Timer fadeTimer;
+        private Timer moveTimer;
+
         protected virtual void OnDraw()
         {
         }
@@ -125,6 +136,14 @@ namespace Kit.Graphics.Components
 
         public virtual void PreDrawComponent(KitBrush brush)
         {
+            if(FadeControl.Animating)
+            {
+                Opacity = FadeControl.GetGradient();
+            }
+            if(MovementControl.Animating)
+            {
+                Location = startPos + ((endPos - startPos) * MovementControl.GetGradient());
+            }
             foreach (KitComponent child in Children)
             {
                 child.PreDrawComponent(brush);
@@ -263,6 +282,84 @@ namespace Kit.Graphics.Components
                     parent.popNecessaryClips(brush);
                 }
             }
+        }
+
+        private void onFadeElapsed()
+        {
+            lock (ComponentLock)
+            {
+                if (FadeControl.AnimationLength != -1)
+                {
+                    FadeControl.BeginAnimation(time, "fade");
+                }
+            }
+        }
+
+        private void onMoveElapsed()
+        {
+            lock (ComponentLock)
+            {
+                if (MovementControl.AnimationLength != -1)
+                {
+                    MovementControl.BeginAnimation(time, "move");
+                }
+            }
+        }
+
+        public void SetFade(double startOffset, double time, bool startInvisible = true, KitEasingMode easeMode = KitEasingMode.EaseIn, KitEasingType easeType = KitEasingType.Line)
+        {
+            FadeControl.Easing.EasingMode = easeMode;
+            FadeControl.Easing.EasingType = easeType;
+            FadeControl.Inverted = !startInvisible;
+            if(startInvisible)
+            {
+                Opacity = 0;
+            }
+            else
+            {
+                Opacity = 1;
+            }
+            if (startOffset <= 0)
+            {
+                startOffset = 0.0000000000000000000000001;
+            }
+            fadeTimer.Interval = startOffset;
+            FadeControl.AnimationLength = time;
+        }
+
+        public void SetMovement(double startOffset, double time, Vector2 start, Vector2 end, KitEasingMode easeMode = KitEasingMode.EaseIn, KitEasingType easeType = KitEasingType.Line)
+        {
+            MovementControl.Easing.EasingMode = easeMode;
+            MovementControl.Easing.EasingType = easeType;
+            if (startOffset <= 0)
+            {
+                startOffset = 0.0000000000000000000000001;
+            }
+            moveTimer.Interval = startOffset;
+            MovementControl.AnimationLength = time;
+            startPos = start;
+            endPos = end;
+            Location = start;
+        }
+
+        public void StartAnimation()
+        {
+            fadeTimer.AutoReset = false;
+            moveTimer.AutoReset = false;
+            fadeTimer.Start();
+            moveTimer.Start();
+        }
+
+        public void StopAnimation()
+        {
+            fadeTimer.Stop();
+            moveTimer.Stop();
+            double t1 = fadeTimer.Interval;
+            double t2 = moveTimer.Interval;
+            fadeTimer.Dispose();
+            moveTimer.Dispose();
+            fadeTimer = new Timer(t1);
+            moveTimer = new Timer(t2);
         }
     }
 }

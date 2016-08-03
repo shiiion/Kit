@@ -8,9 +8,6 @@ using Kit.Graphics.Types;
 using Kit.Core;
 using System.Windows.Media;
 
-//  QUADRATIC INTERPOLATION FOR ANIMATION
-//  ANIMATIONS CAN BE APPLIED TO ANY KITCOMPONENT
-
 namespace Kit
 {
     /// <summary>
@@ -52,56 +49,65 @@ namespace Kit
         {
             KitWindow startWindow = new KitWindow("Test Window");
 
-            KitTextAnimation kta1 = new KitTextAnimation("option 1", "Consolas", 12)
-            {
-                TextColor = Colors.Red,
-                Location = new Vector2(100, 100)
-            };
-            KitTextAnimation kta2 = new KitTextAnimation("option 2", "Consolas", 12)
-            {
-                TextColor = Colors.Red,
-                Location = new Vector2(100, 120)
-            };
-            KitTextAnimation kta3 = new KitTextAnimation("option 3", "Consolas", 12)
-            {
-                TextColor = Colors.Red,
-                Location = new Vector2(100, 140)
-            };
-            KitTextAnimation kta4 = new KitTextAnimation("option 4", "Consolas", 12)
-            {
-                TextColor = Colors.Red,
-                Location = new Vector2(100, 160)
-            };
+            KitButton kb1 = new KitButton("do something", "Consolas", 12, Colors.Black, Colors.DarkGray, Colors.White, new Vector2(2, 2), 3);
+            KitButton kb2 = new KitButton("button 2", "Consolas", 12, Colors.Black, Colors.DarkGray, Colors.White, new Vector2(2, 2), 3);
+            KitButton kb3 = new KitButton("button 3", "Consolas", 12, Colors.Black, Colors.DarkGray, Colors.White, new Vector2(2, 2), 3);
+            KitButton kb4 = new KitButton("animate again", "Consolas", 12, Colors.Black, Colors.DarkGray, Colors.White, new Vector2(2, 2), 3);
 
-            kta1.SetFade(200, 180);
-            kta1.SetMovement(200, 150, new Vector2(100, 80), new Vector2(100, 100));
-            kta2.SetFade(320, 180);
-            kta2.SetMovement(320, 150, new Vector2(100, 100), new Vector2(100, 120));
-            kta3.SetFade(440, 180);
-            kta3.SetMovement(440, 150, new Vector2(100, 120), new Vector2(100, 140));
-            kta4.SetFade(560, 180);
-            kta4.SetMovement(560, 150, new Vector2(100, 140), new Vector2(100, 160));
+            kb1.SetFade(0, 800, true, KitEasingMode.EaseOut, KitEasingType.Cubic);
+            kb1.SetMovement(0, 800, new Vector2(80, 80), new Vector2(100, 100), KitEasingMode.EaseOut, KitEasingType.Expo);
+            kb2.SetFade(60, 800, true, KitEasingMode.EaseOut, KitEasingType.Cubic);
+            kb2.SetMovement(60, 800, new Vector2(100, 100), new Vector2(120, 120), KitEasingMode.EaseOut, KitEasingType.Expo);
+            kb3.SetFade(120, 800, true, KitEasingMode.EaseOut, KitEasingType.Cubic);
+            kb3.SetMovement(120, 800, new Vector2(120, 120), new Vector2(120, 140), KitEasingMode.EaseOut, KitEasingType.Expo);
+            kb4.SetFade(180, 800, true, KitEasingMode.EaseOut, KitEasingType.Cubic);
+            kb4.SetMovement(180, 800, new Vector2(120, 140), new Vector2(100, 160), KitEasingMode.EaseOut, KitEasingType.Expo);
 
 
-            startWindow.TopLevelComponent.AddChild(kta1);
-            startWindow.TopLevelComponent.AddChild(kta2);
-            startWindow.TopLevelComponent.AddChild(kta3);
-            startWindow.TopLevelComponent.AddChild(kta4);
+            startWindow.TopLevelComponent.AddChild(kb1);
+            startWindow.TopLevelComponent.AddChild(kb2);
+            startWindow.TopLevelComponent.AddChild(kb3);
+            startWindow.TopLevelComponent.AddChild(kb4);
             startWindow.Width = 700;
             startWindow.Height = 324;
             WindowList.Add(startWindow);
             startWindow.ClickableBackground = true;
             startWindow.Show();
-            kta1.StartAnimation();
-            kta2.StartAnimation();
-            kta3.StartAnimation();
-            kta4.StartAnimation();
+            kb1.StartAnimation();
+            kb2.StartAnimation();
+            kb3.StartAnimation();
+            kb4.StartAnimation();
+
+            kb4.Released += () =>
+            {
+                kb1.StartAnimation();
+                kb2.StartAnimation();
+                kb3.StartAnimation();
+                kb4.StartAnimation();
+            };
+
+            kb1.Released += () =>
+            {
+                RunCmdLine("start notepad");
+            };
+        }
+
+        public static void RunCmdLine(string cmd)
+        {
+            System.Diagnostics.Process p = new System.Diagnostics.Process();
+            System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo();
+            psi.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            psi.FileName = "cmd.exe";
+            psi.Arguments = "/C " + cmd;
+            p.StartInfo = psi;
+            p.Start();
+            p.WaitForExit();
         }
 
         [STAThread]
         public static void Main(string[] args)
         {
-            Core.GlobalTimer.StartTimer();
+            GlobalTimer.StartTimer();
             WindowList = new List<KitWindow>();
             RemoveList = new List<KitWindow>();
             App kitApp = new App();

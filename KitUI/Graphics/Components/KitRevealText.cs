@@ -35,14 +35,14 @@ namespace Kit.Graphics.Components
             curIndex = 0;
         }
         
-        public void StartAnimation()
+        public void StartRevealAnimation()
         {
             curIndex = 0;
             running = true;
             lastRevealTime = time;
         }
 
-        public void StopAnimation()
+        public void StopRevealAnimation()
         {
             running = false;
         }

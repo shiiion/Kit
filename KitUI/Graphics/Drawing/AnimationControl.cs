@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Kit.Core;
 
 namespace Kit.Graphics.Drawing
 {
     public class AnimationControl
     {
+        public KitEasing Easing { get; set; }
+
         public double AnimationLength { get; set; }
 
         public double ValueRange { get; set; }
@@ -20,6 +18,8 @@ namespace Kit.Graphics.Drawing
         private double curGradientValue;
         public double StartTime { get; set; }
 
+        public bool Inverted { get; set; }
+
         public AnimationControl(double animationLength, double valueRange)
         {
             AnimationLength = animationLength;
@@ -27,6 +27,7 @@ namespace Kit.Graphics.Drawing
             StartTime = -1;
             ResetAnimation();
             AnimationTag = "";
+            Easing = new KitEasing(KitEasingMode.EaseIn, KitEasingType.Line);
         }
 
         public void ResetAnimation()
@@ -46,7 +47,14 @@ namespace Kit.Graphics.Drawing
 
         public double GetGradient()
         {
-            return curGradientValue * ValueRange;
+            if (Inverted)
+            {
+                return (1 - curGradientValue) * ValueRange;
+            }
+            else
+            {
+                return curGradientValue * ValueRange;
+            }
         }
 
         public bool AnimationOver()
@@ -54,15 +62,24 @@ namespace Kit.Graphics.Drawing
             return curGradientValue >= 1;
         }
 
+        private void ease(double curTime)
+        {
+            double normTime = (curTime - StartTime) / AnimationLength;
+            if (normTime > 1)
+            {
+                curGradientValue = 1;
+            }
+            else
+            {
+                curGradientValue = Easing.Ease(normTime);
+            }
+        }
+
         public void StepAnimation(double curTime)
         {
             if (animating && !AnimationOver())
             {
-                curGradientValue = (curTime - StartTime) / AnimationLength;
-                if (curGradientValue > 1)
-                {
-                    curGradientValue = 1;
-                }
+                ease(curTime);
             }
         }
 

@@ -15,6 +15,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Core\Exceptions\TimerStoppedException.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\GlobalTimer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\InputData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Core\KitEasing.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\MultilineIOFormatter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Core\TextIOFormatter.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\Components\IContainer.cs" />
@@ -27,7 +28,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\Components\KitRevealText.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\Components\KitScrollbar.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\Components\KitText.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Graphics\Components\KitTextAnimation.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\Components\KitTextArea.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\Components\KitTextBox.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Graphics\Components\KitTitleBar.cs" />

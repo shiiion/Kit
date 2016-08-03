@@ -21,12 +21,18 @@ namespace Kit.Graphics.Components
 
         public bool OpacityMode { get; set; }
 
+        private KitComponent drawArea;
+
         public TopLevelComponent(Vector2 windowDims, string title, VoidDelegate onClose, string xButtonRes, string xButtonReleaseRes)
             : base(Vector2.Zero, new Vector2(windowDims.X, windowDims.Y))
         {
             drawOrder = new List<KitComponent>();
             TitleBar = new KitTitleBar(System.Windows.Media.Color.FromArgb(220, 127, 127, 127), this, onClose, xButtonRes, xButtonReleaseRes, title);
             AddChild(TitleBar);
+            drawArea = new KitComponent(new Vector2(0, 22), new Vector2(windowDims.X, windowDims.Y - 22));
+
+            Resize += () => { drawArea.Size = new Vector2(Size.X, Size.Y - 22); };
+            AddChild(drawArea);
             OpacityMode = true;
         }
 
@@ -168,6 +174,11 @@ namespace Kit.Graphics.Components
                 DrawComponentDebugInfo(brush);
             }
 #endif
+        }
+
+        public void AddToDrawArea(KitComponent child)
+        {
+            drawArea.AddChild(child);
         }
     }
 }

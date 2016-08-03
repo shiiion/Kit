@@ -49,9 +49,12 @@ namespace Kit
 
             CompositionTarget.Rendering += (o, e) =>
             {
-                if (TopLevelComponent.Redraw)
+                lock(windowLock)
                 {
-                    InvalidateVisual();
+                    if (TopLevelComponent.Redraw)
+                    {
+                        InvalidateVisual();
+                    }
                 }
             };
 
