@@ -92,31 +92,7 @@ namespace Kit.Graphics.Components
             AddChild(closeButton);
         }
 
-        #region Interop GetCursorPos
-        [StructLayout(LayoutKind.Sequential)]
-        private struct POINT
-        {
-            public int X;
-            public int Y;
-
-            public static implicit operator Vector2(POINT point)
-            {
-                return new Vector2(point.X, point.Y);
-            }
-        }
-
-        [DllImport("user32.dll")]
-        private static extern bool GetCursorPos(out POINT lpPoint);
-
-        public static Vector2 GetCursorPosition()
-        {
-            POINT lpPoint;
-            GetCursorPos(out lpPoint);
-
-            return lpPoint;
-        }
-
-        #endregion
+        
 
         protected override void OnMouseInput(Vector2 clickLocation, MouseState mouseFlags)
         {
@@ -132,7 +108,7 @@ namespace Kit.Graphics.Components
 
         protected override void OnUpdate()
         {
-            Vector2 cursorLoc = GetCursorPosition() - topParent.WindowLocation;
+            Vector2 cursorLoc = InteropFunctions.GetCursorPosition() - topParent.WindowLocation;
             if (topParent.Contains(cursorLoc))
             {
                 if (!fadingAnimation.Animating || fadingAnimation.AnimationTag.Equals("fadeout") ||
@@ -173,7 +149,7 @@ namespace Kit.Graphics.Components
 
         protected override bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
-            if (state == MouseState.Left)
+            if (state == (MouseState.Left | MouseState.Down))
             {
                 if ((Contains(start) || Contains(end)) && Focused)
                 {

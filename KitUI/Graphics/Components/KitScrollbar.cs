@@ -125,7 +125,7 @@ namespace Kit.Graphics.Components
         {
             if (Enabled)
             {
-                if (isClicked)
+                if (isClicked && ((state & MouseState.Down) == MouseState.Down))
                 {
                     double relY = end.Y - clickLocation.Y;
                     double yLoc = Math.Max(0, Math.Min(startLocation.Y + relY + scrollBar.Size.Y, Size.Y) - scrollBar.Size.Y);

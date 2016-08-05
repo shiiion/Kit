@@ -23,6 +23,7 @@ namespace Kit
         private object windowLock = new object();
 
         private Vector2 lastMouseLoc;
+        private Vector2 lastMouseMove;
 
         private Vector2 windowLoc;
 
@@ -97,10 +98,7 @@ namespace Kit
             }
         }
 
-        [DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-        [DllImport("user32.dll")]
-        public static extern bool ReleaseCapture();
+        
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
@@ -198,30 +196,31 @@ namespace Kit
 
         protected override void OnMouseMove(MouseEventArgs e)
         {
+            if(e.LeftButton == MouseButtonState.Released)
+            {
+                MouseState state = 0;
+                Vector2 newLoc = (Vector2)e.GetPosition(this);
+                TopLevelComponent.NotifyMouseMove(state, lastMouseMove, newLoc);
+                lastMouseMove = newLoc;
+                base.OnMouseMove(e);
+                return;
+            }
             if (lastMouseLoc.X != -1)
             {
-                MouseState state;
+                MouseState state = 0;
+
                 if (e.LeftButton == MouseButtonState.Pressed)
                 {
-                    state = MouseState.Left;
-                }
-                else if (e.RightButton == MouseButtonState.Pressed)
-                {
-                    state = 0;
-                }
-                else
-                {
-                    base.OnMouseMove(e);
-                    return;
+                    state |= MouseState.Left | MouseState.Down;
                 }
 
                 Vector2 newLoc = (Vector2)e.GetPosition(this);
-                if (TopLevelComponent.NotifyMouseMove(state, lastMouseLoc, newLoc) && e.LeftButton == MouseButtonState.Pressed)
+                if (TopLevelComponent.NotifyMouseMove(state, lastMouseLoc, newLoc))
                 {
-                    ReleaseCapture();
-                    SendMessage(new WindowInteropHelper(this).Handle, 0xA1, 0x2, 0);
+                    InteropFunctions.ReleaseCapture();
+                    InteropFunctions.SendMessage(new WindowInteropHelper(this).Handle, 0xA1, 0x2, 0);
                 }
-                lastMouseLoc = newLoc;
+                lastMouseMove = lastMouseLoc = newLoc;
             }
             base.OnMouseMove(e);
         }

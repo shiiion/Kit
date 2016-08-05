@@ -145,7 +145,7 @@ namespace Kit.Graphics.Components
 
         protected override bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
-            if ((Focused || TextField.Focused) && state == MouseState.Left)
+            if ((Focused || TextField.Focused) && state == (MouseState.Left | MouseState.Down))
             {
                 if (!formatter.HighlightEnabled())
                 {

@@ -123,12 +123,12 @@ namespace Kit.Graphics.Components
 
         protected override bool OnMouseMove(MouseState state, Vector2 start, Vector2 end)
         {
-            if (isPressed && !Contains(end) && referencedVC == VisualComponentPressed)
+            if (isPressed && !Contains(end) && referencedVC == VisualComponentPressed && ((state & MouseState.Down) == MouseState.Down))
             {
                 referencedVC = VisualComponentReleased;
                 Redraw = true;
             }
-            else if (isPressed && Contains(end) && referencedVC == VisualComponentReleased)
+            else if (isPressed && Contains(end) && referencedVC == VisualComponentReleased && ((state & MouseState.Down) == MouseState.Down))
             {
                 referencedVC = VisualComponentPressed;
                 Redraw = true;

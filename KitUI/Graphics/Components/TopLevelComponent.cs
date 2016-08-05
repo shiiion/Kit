@@ -180,5 +180,10 @@ namespace Kit.Graphics.Components
         {
             drawArea.AddChild(child);
         }
+
+        public override Vector2 GetWindowLocation()
+        {
+            return WindowLocation;
+        }
     }
 }

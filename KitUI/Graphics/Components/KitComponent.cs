@@ -45,7 +45,7 @@ namespace Kit.Graphics.Components
         public Vector2 CustomOrigin { get; set; }
         public Vector2 CustomAnchor { get; set; }
 
-        public event VoidDelegate Update;
+        public event ComponentDelegate Update;
         public event VoidDelegate Resize;
         public event MouseStateDelegate MouseInput;
         public event KeyStateDelegate KeyInput;
@@ -99,6 +99,18 @@ namespace Kit.Graphics.Components
             this.parent = parent;
         }
 
+        public virtual Vector2 GetWindowLocation()
+        {
+            if (parent != null)
+            {
+                return parent.GetWindowLocation();
+            }
+            else
+            {
+                return default(Vector2);
+            }
+        }
+
         public void AddChild(KitComponent child)
         {
             if (!isValidChild(child))
@@ -132,6 +144,12 @@ namespace Kit.Graphics.Components
         {
             Box thisBox = new Box(GetAbsoluteLocation(), Size);
             return thisBox.Contains(point);
+        }
+
+        public bool ContainsCursor()
+        {
+            Box thisBox = new Box(GetAbsoluteLocation(), Size);
+            return thisBox.Contains(InteropFunctions.GetCursorPosition() - GetWindowLocation());
         }
 
         public Vector2 GetLocation()
@@ -169,16 +187,16 @@ namespace Kit.Graphics.Components
 
         public void UpdateSubcomponents(double CurTime)
         {
+
+            foreach (KitComponent child in Children)
+            {
+                child.UpdateSubcomponents(CurTime);
+            }
+
             lock (componentLock)
             {
                 time = CurTime;
-
-                foreach (KitComponent child in Children)
-                {
-                    child.UpdateSubcomponents(CurTime);
-                }
-
-                Update?.Invoke();
+                Update?.Invoke(this);
                 OnUpdate();
             }
         }
@@ -272,11 +290,11 @@ namespace Kit.Graphics.Components
 
         public void _NotifyScroll(Vector2 mouseLoc, int direction)
         {
-            foreach(KitComponent child in Children)
+            foreach (KitComponent child in Children)
             {
                 child._NotifyScroll(mouseLoc, direction);
             }
-            lock(ComponentLock)
+            lock (ComponentLock)
             {
                 OnScroll(mouseLoc, direction);
                 Scroll?.Invoke(mouseLoc, direction);
@@ -290,7 +308,7 @@ namespace Kit.Graphics.Components
             {
                 ret |= child._NotifyMouseMove(state, start, end);
             }
-            lock(ComponentLock)
+            lock (ComponentLock)
             {
                 ret |= OnMouseMove(state, start, end);
                 MouseMove?.Invoke(state, start, end);

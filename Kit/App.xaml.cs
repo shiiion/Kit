@@ -15,15 +15,17 @@ namespace Kit
     /// </summary>
     public partial class App : Application
     {
-        public static List<KitWindow> WindowList { get; set; }
+        private static List<KitWindow> WindowList { get; set; }
         public static List<KitWindow> RemoveList { get; set; }
+        public static List<KitWindow> AddList { get; set; }
 
         public static object WindowListLock = new object();
         public static object RemoveLock = new object();
+        public static object AddObject = new object();
 
         private static void updateThread()
         {
-            while (WindowList.Count > 0)
+            while (WindowList.Count > 0 || AddList.Count > 0)
             {
                 lock (WindowListLock)
                 {
@@ -33,13 +35,22 @@ namespace Kit
                     }
                 }
 
-                lock(RemoveLock)
+                lock (RemoveLock)
                 {
                     foreach (KitWindow window in RemoveList)
                     {
                         WindowList.Remove(window);
                     }
                     RemoveList.Clear();
+                }
+
+                lock (AddObject)
+                {
+                    foreach (KitWindow window in AddList)
+                    {
+                        WindowList.Add(window);
+                    }
+                    AddList.Clear();
                 }
                 Thread.Sleep(16);
             }
@@ -49,34 +60,66 @@ namespace Kit
         {
             KitWindow startWindow = new KitWindow("Test Window");
 
-            KitButton kb1 = new KitButton("do something", "Consolas", 12, Colors.Black, Colors.DarkGray, Colors.White, new Vector2(2, 2), 3);
-            KitButton kb2 = new KitButton("button 2", "Consolas", 12, Colors.Black, Colors.DarkGray, Colors.White, new Vector2(2, 2), 3);
-            KitButton kb3 = new KitButton("button 3", "Consolas", 12, Colors.Black, Colors.DarkGray, Colors.White, new Vector2(2, 2), 3);
-            KitButton kb4 = new KitButton("animate again", "Consolas", 12, Colors.Black, Colors.DarkGray, Colors.White, new Vector2(2, 2), 3);
+            KitButton kb1 = new KitButton("zz~~", "Consolas", 20, Colors.Black, Color.FromArgb(0xff, 0xb5, 0x5d, 0x7a), Colors.PaleVioletRed, new Vector2(2, 2), 3)
+            {
+                Anchor = KitAnchoring.TopRight,
+                Origin = KitAnchoring.TopRight
+            };
+            KitButton kb2 = new KitButton("zzg 2~~", "Consolas", 20, Colors.Black, Color.FromArgb(0xff, 0x7a, 0x5d, 0xb5), Colors.MediumPurple, new Vector2(2, 2), 3)
+            {
+                Anchor = KitAnchoring.TopRight,
+                Origin = KitAnchoring.TopRight
+            };
+            KitButton kb3 = new KitButton("fghdfg 3~~", "Consolas", 20, Colors.Black, Color.FromArgb(0xff, 0x8c, 0xd4, 0x8c), Color.FromArgb(0xff, 0xa6, 0xfb, 0xa6), new Vector2(2, 2), 3)
+            {
+                Anchor = KitAnchoring.TopRight,
+                Origin = KitAnchoring.TopRight
+            };
+            KitButton kb4 = new KitButton("r67im~~", "Consolas", 20, Colors.Black, Color.FromArgb(0xff, 0xd9, 0xd9, 0x91), Color.FromArgb(0xff, 0xff, 0xff, 0xaa), new Vector2(2, 2), 3)
+            {
+                Anchor = KitAnchoring.TopRight,
+                Origin = KitAnchoring.TopRight
+            };
+            KitButton kb5 = new KitButton("ofgh~~", "Consolas", 20, Colors.Black, Color.FromArgb(0xff, 0xd9, 0xd9, 0xd9), Colors.White, new Vector2(2, 2), 3)
+            {
+                Anchor = KitAnchoring.TopRight,
+                Origin = KitAnchoring.TopRight
+            };
 
-            kb1.SetFade(0, 800, true, KitEasingMode.EaseOut, KitEasingType.Cubic);
-            kb1.SetMovement(0, 800, new Vector2(80, 80), new Vector2(100, 100), KitEasingMode.EaseOut, KitEasingType.Expo);
-            kb2.SetFade(60, 800, true, KitEasingMode.EaseOut, KitEasingType.Cubic);
-            kb2.SetMovement(60, 800, new Vector2(100, 100), new Vector2(120, 120), KitEasingMode.EaseOut, KitEasingType.Expo);
-            kb3.SetFade(120, 800, true, KitEasingMode.EaseOut, KitEasingType.Cubic);
-            kb3.SetMovement(120, 800, new Vector2(120, 120), new Vector2(120, 140), KitEasingMode.EaseOut, KitEasingType.Expo);
-            kb4.SetFade(180, 800, true, KitEasingMode.EaseOut, KitEasingType.Cubic);
-            kb4.SetMovement(180, 800, new Vector2(120, 140), new Vector2(100, 160), KitEasingMode.EaseOut, KitEasingType.Expo);
+            kb1.SetFade(500, 800, "beginFade", true, KitEasingMode.EaseOut, KitEasingType.Quad);
+            kb1.SetMovement(500, 800, new Vector2(kb1.Size.X, 22), new Vector2(20, 22), "beginMove", KitEasingMode.EaseOut, KitEasingType.Expo);
+            kb2.SetFade(540, 800, "beginFade", true, KitEasingMode.EaseOut, KitEasingType.Quad);
+            kb2.SetMovement(540, 800, new Vector2(kb2.Size.X, 22 + kb1.Size.Y), new Vector2(20, 22 + kb1.Size.Y), "beginMove", KitEasingMode.EaseOut, KitEasingType.Expo);
+            kb3.SetFade(580, 800, "beginFade", true, KitEasingMode.EaseOut, KitEasingType.Quad);
+            kb3.SetMovement(580, 800, new Vector2(kb3.Size.X, 22 + 2 * kb1.Size.Y), new Vector2(20, 22 + 2 * kb1.Size.Y), "beginMove", KitEasingMode.EaseOut, KitEasingType.Expo);
+            kb4.SetFade(620, 800, "beginFade", true, KitEasingMode.EaseOut, KitEasingType.Quad);
+            kb4.SetMovement(620, 800, new Vector2(kb4.Size.X, 22 + 3 * kb1.Size.Y), new Vector2(20, 22 + 3 * kb1.Size.Y), "beginMove", KitEasingMode.EaseOut, KitEasingType.Expo);
+            kb5.SetFade(660, 800, "beginFade", true, KitEasingMode.EaseOut, KitEasingType.Quad);
+            kb5.SetMovement(660, 800, new Vector2(kb5.Size.X, 22 + 4 * kb1.Size.Y), new Vector2(20, 22 + 4 * kb1.Size.Y), "beginMove", KitEasingMode.EaseOut, KitEasingType.Expo);
 
 
             startWindow.TopLevelComponent.AddChild(kb1);
             startWindow.TopLevelComponent.AddChild(kb2);
             startWindow.TopLevelComponent.AddChild(kb3);
             startWindow.TopLevelComponent.AddChild(kb4);
+            startWindow.TopLevelComponent.AddChild(kb5);
+
             startWindow.Width = 700;
-            startWindow.Height = 324;
-            WindowList.Add(startWindow);
+            startWindow.Height = 322;
+
+            lock (AddObject)
+            {
+                AddList.Add(startWindow);
+            }
+
             startWindow.ClickableBackground = true;
             startWindow.Show();
+
             kb1.StartAnimation();
             kb2.StartAnimation();
             kb3.StartAnimation();
             kb4.StartAnimation();
+            kb5.StartAnimation();
 
             kb4.Released += () =>
             {
@@ -84,11 +127,88 @@ namespace Kit
                 kb2.StartAnimation();
                 kb3.StartAnimation();
                 kb4.StartAnimation();
+                kb5.StartAnimation();
             };
 
             kb1.Released += () =>
             {
-                RunCmdLine("start notepad");
+                createStartupWindow();
+            };
+
+            kb1.Update += (c) =>
+            {
+                if (!c.MovementControl.AnimationOver())
+                    return;
+                if (kb1.ContainsCursor() && (kb1.MovementControl.AnimationTag.Equals("moveBack") || kb1.MovementControl.AnimationTag.Equals("beginMove")))
+                {
+                    kb1.SetMovement(0, 100, new Vector2(20, 22), new Vector2(10, 22), "moveHover", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb1.StartAnimation(true, false);
+                }
+                else if (!kb1.ContainsCursor() && kb1.MovementControl.AnimationTag.Equals("moveHover"))
+                {
+                    kb1.SetMovement(0, 100, new Vector2(10, 22), new Vector2(20, 22), "moveBack", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb1.StartAnimation(true, false);
+                }
+            };
+            kb2.Update += (c) =>
+            {
+                if (!c.MovementControl.AnimationOver())
+                    return;
+                if (kb2.ContainsCursor() && (kb2.MovementControl.AnimationTag.Equals("moveBack") || kb2.MovementControl.AnimationTag.Equals("beginMove")))
+                {
+                    kb2.SetMovement(0, 100, new Vector2(20, kb2.Location.Y), new Vector2(10, kb2.Location.Y), "moveHover", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb2.StartAnimation(true, false);
+                }
+                else if (!kb2.ContainsCursor() && kb2.MovementControl.AnimationTag.Equals("moveHover"))
+                {
+                    kb2.SetMovement(0, 100, new Vector2(10, kb2.Location.Y), new Vector2(20, kb2.Location.Y), "moveBack", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb2.StartAnimation(true, false);
+                }
+            };
+            kb3.Update += (c) =>
+            {
+                if (!c.MovementControl.AnimationOver())
+                    return;
+                if (kb3.ContainsCursor() && (kb3.MovementControl.AnimationTag.Equals("moveBack") || kb3.MovementControl.AnimationTag.Equals("beginMove")))
+                {
+                    kb3.SetMovement(0, 100, new Vector2(20, kb3.Location.Y), new Vector2(10, kb3.Location.Y), "moveHover", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb3.StartAnimation(true, false);
+                }
+                else if (!kb3.ContainsCursor() && kb3.MovementControl.AnimationTag.Equals("moveHover"))
+                {
+                    kb3.SetMovement(0, 100, new Vector2(10, kb3.Location.Y), new Vector2(20, kb3.Location.Y), "moveBack", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb3.StartAnimation(true, false);
+                }
+            };
+            kb4.Update += (c) =>
+            {
+                if (!c.MovementControl.AnimationOver())
+                    return;
+                if (kb4.ContainsCursor() && (kb4.MovementControl.AnimationTag.Equals("moveBack") || kb4.MovementControl.AnimationTag.Equals("beginMove")))
+                {
+                    kb4.SetMovement(0, 100, new Vector2(20, kb4.Location.Y), new Vector2(10, kb4.Location.Y), "moveHover", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb4.StartAnimation(true, false);
+                }
+                else if (!kb4.ContainsCursor() && kb4.MovementControl.AnimationTag.Equals("moveHover"))
+                {
+                    kb4.SetMovement(0, 100, new Vector2(10, kb4.Location.Y), new Vector2(20, kb4.Location.Y), "moveBack", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb4.StartAnimation(true, false);
+                }
+            };
+            kb5.Update += (c) =>
+            {
+                if (!c.MovementControl.AnimationOver())
+                    return;
+                if (kb5.ContainsCursor() && (kb5.MovementControl.AnimationTag.Equals("moveBack") || kb5.MovementControl.AnimationTag.Equals("beginMove")))
+                {
+                    kb5.SetMovement(0, 100, new Vector2(20, kb5.Location.Y), new Vector2(10, kb5.Location.Y), "moveHover", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb5.StartAnimation(true, false);
+                }
+                else if (!kb5.ContainsCursor() && kb5.MovementControl.AnimationTag.Equals("moveHover"))
+                {
+                    kb5.SetMovement(0, 100, new Vector2(10, kb5.Location.Y), new Vector2(20, kb5.Location.Y), "moveBack", KitEasingMode.EaseOut, KitEasingType.Quad);
+                    kb5.StartAnimation(true, false);
+                }
             };
         }
 
@@ -110,6 +230,7 @@ namespace Kit
             GlobalTimer.StartTimer();
             WindowList = new List<KitWindow>();
             RemoveList = new List<KitWindow>();
+            AddList = new List<KitWindow>();
             App kitApp = new App();
             createStartupWindow();
             Thread kitUpdateThread = new Thread(updateThread);
