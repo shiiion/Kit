@@ -25,11 +25,11 @@ namespace Kit.Graphics.Components
                 Redraw = true;
             }
         }
+
         private TopLevelComponent topParent;
 
         private KitText titleComponent;
         private KitButton closeButton;
-        private AnimationControl fadingAnimation;
 
         public KitTitleBar(Color barColor, TopLevelComponent topParent, VoidDelegate onClose, string pressRes, string releasedRes, string title = "", Vector2 location = default(Vector2))
             : base(location)
@@ -46,7 +46,7 @@ namespace Kit.Graphics.Components
 
             Opacity = 0;
 
-            fadingAnimation = new AnimationControl(350, 1);
+            FadeControl = new AnimationControl(350, 1);
 
             topParent.Resize += () =>
             {
@@ -111,35 +111,35 @@ namespace Kit.Graphics.Components
             Vector2 cursorLoc = InteropFunctions.GetCursorPosition() - topParent.WindowLocation;
             if (topParent.Contains(cursorLoc))
             {
-                if (!fadingAnimation.Animating || fadingAnimation.AnimationTag.Equals("fadeout") ||
-                    (fadingAnimation.AnimationTag.Equals("fadeouthover") && (time - hoverTime < 3000)))
+                if (!FadeControl.Animating || FadeControl.AnimationTag.Equals("fadeout") ||
+                    (FadeControl.AnimationTag.Equals("fadeouthover") && (time - hoverTime < 3000)))
                 {
-                    fadingAnimation.Inverted = false;
+                    FadeControl.Inverted = false;
                     hoverTime = time;
                     hover = cursorLoc;
-                    fadingAnimation.BeginAnimation(time, "fadein");
+                    FadeControl.BeginAnimation(time, "fadein");
                 }
                 if (!cursorLoc.Equals(hover) || closeButton.IsPressed)
                 {
                     hoverTime = time;
                 }
-                if (time - hoverTime >= 3000 && !fadingAnimation.AnimationTag.Equals("fadeouthover"))
+                if (time - hoverTime >= 3000 && !FadeControl.AnimationTag.Equals("fadeouthover"))
                 {
-                    fadingAnimation.Inverted = true;
-                    fadingAnimation.BeginAnimation(time, "fadeouthover");
+                    FadeControl.Inverted = true;
+                    FadeControl.BeginAnimation(time, "fadeouthover");
                 }
             }
             else
             {
-                if (fadingAnimation.AnimationTag.Equals("fadein") || fadingAnimation.AnimationTag.Equals("fadeouthover"))
+                if (FadeControl.AnimationTag.Equals("fadein") || FadeControl.AnimationTag.Equals("fadeouthover"))
                 {
-                    fadingAnimation.Inverted = true;
-                    fadingAnimation.BeginAnimation(time, "fadeout");
+                    FadeControl.Inverted = true;
+                    FadeControl.BeginAnimation(time, "fadeout");
                 }
             }
-            fadingAnimation.StepAnimation(time);
+            FadeControl.StepAnimation(time);
 
-            if (!fadingAnimation.AnimationOver() && fadingAnimation.Animating)
+            if (!FadeControl.AnimationOver() && FadeControl.Animating)
             {
                 Redraw = true;
             }
@@ -161,11 +161,11 @@ namespace Kit.Graphics.Components
 
         public override void PreDrawComponent(KitBrush brush)
         {
-            if (fadingAnimation.AnimationOver())
+            if (FadeControl.AnimationOver())
             {
                 Redraw = false;
             }
-            Opacity = fadingAnimation.GetGradient();
+            Opacity = FadeControl.GetGradient();
             titleComponent.Opacity = Opacity;
             closeButton.Opacity = Opacity;
             base.PreDrawComponent(brush);
@@ -173,7 +173,7 @@ namespace Kit.Graphics.Components
 
         protected override void DrawComponent(KitBrush brush)
         {
-            if (fadingAnimation.Animating)
+            if (FadeControl.Animating)
             {
                 brush.DrawRoundedRectangle(new Box(topParent.GetLocation(), Size), true, BarColor, 5, 5);
                 return;

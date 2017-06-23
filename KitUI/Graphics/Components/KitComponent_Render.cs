@@ -138,11 +138,11 @@ namespace Kit.Graphics.Components
 
         public virtual void PreDrawComponent(KitBrush brush)
         {
-            if(!FadeControl.AnimationOver())
+            if(!FadeControl.AnimationOver() && FadeControl.Animating)
             {
                 Opacity = FadeControl.GetGradient();
             }
-            if(!MovementControl.AnimationOver())
+            if(!MovementControl.AnimationOver() && MovementControl.Animating)
             {
                 Location = startPos + ((endPos - startPos) * MovementControl.GetGradient());
             }
